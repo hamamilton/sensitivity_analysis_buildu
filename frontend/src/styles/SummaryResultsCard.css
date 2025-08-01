@@ -1,0 +1,47 @@
+.container {
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background: linear-gradient(90deg, rgba(255, 105, 180, 1) 0%, rgba(255, 255, 255, 1) 100%);
+    color: #333;
+    font-weight: bold;
+    font-size: 1.5rem;
+    padding: 10px;
+}
+
+.table {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.table th, .table td {
+    text-align: center;
+    padding: 10px;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+.table-bordered {
+    border: 1px solid #dee2e6;
+}
+
+.text-danger {
+    color: red;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .card-header {
+        font-size: 1.25rem;
+    }
+}
