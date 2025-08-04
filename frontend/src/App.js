@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Header from './components/Header';
 import EmailCaptureForm from './components/EmailCaptureForm';
 import SensitivityCalculator from './components/SensitivityCalculator';
 import FileUploadForm from './components/FileUploadForm';
@@ -16,6 +17,15 @@ function App() {
   const handleFileUpload = (file) => {
     setUploadedFile(file);
     setStep('calculator');
+  };
+
+  const handleReset = () => {
+    setUploadedFile(null);
+    setStep('fileUpload');
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   const renderCurrentStep = () => {
@@ -53,6 +63,11 @@ function App() {
 
   return (
     <div className="App">
+      <Header 
+        onReset={handleReset}
+        onPrint={handlePrint}
+        showButtons={step === 'calculator'}
+      />
       {renderCurrentStep()}
     </div>
   );

@@ -50,7 +50,7 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
         // Configurable axios call with full URL and timeout
         const response = await axios({
           method: 'post',
-          url: process.env.REACT_APP_UPLOAD_URL || 'http://localhost:8080/api/upload',
+          url: process.env.REACT_APP_UPLOAD_URL || 'http://localhost:8080/api/calculate',
           data: formData,
           headers: {
             'Content-Type': 'multipart/form-data'
@@ -59,7 +59,7 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
         });
 
         if (response.data) {
-          setSubjectProperty(response.data.subjectProperty);
+          setSubjectProperty(response.data.subject_property);
           setComparables(response.data.comparables);
         } else {
           setError('No data received from the server');
@@ -309,9 +309,9 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
       ) : (
         <div className="container-fluid mt-5">
           <h1 className="mb-4 text-center">Adjustment Sensitivity Analysis</h1>
-          <div className="row">
-            {/* Right Column: Results and Charts */}
-            <div className="col-md-8">
+          <div className="row justify-content-center">
+            {/* Main Content: Results and Charts */}
+            <div className="col-lg-10 col-md-12">
               {/* Results Summary Card */}
               {comparables.length > 0 && (
                 <div className="card mb-4 border-info">

@@ -63,6 +63,21 @@ const FileUploadForm = ({ userEmail, onFileUpload }) => {
 
   return (
     <div className="container mt-5">
+      {/* Header with Buildu Logo */}
+      <div className="row justify-content-center mb-4">
+        <div className="col-md-8 text-center">
+          <div className="mb-4">
+            <img 
+              src="/logo192.png" 
+              alt="Buildu Logo" 
+              style={{ height: '60px', marginBottom: '20px' }}
+            />
+            <h1 className="display-6 fw-bold text-primary mb-2">Buildu</h1>
+            <h2 className="h4 text-muted mb-0">Sensitivity Analysis Tool</h2>
+          </div>
+        </div>
+      </div>
+      
       <div className="row justify-content-center">
         <div className="col-md-6">
           <div 
