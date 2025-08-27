@@ -23,7 +23,7 @@ ChartJS.register(
 );
 
 const SensitivityCalculator = ({ userEmail, initialFile }) => {
-  const [file, setFile] = useState(initialFile || null);
+  // Removed unused file and setFile state
   const [subjectProperty, setSubjectProperty] = useState(null);
   const [comparables, setComparables] = useState([]);
   const [error, setError] = useState(null);
@@ -275,19 +275,7 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
     },
   };
 
-  const calculateSummaryCounts = () => {
-    const includedProperties = comparables.filter(
-      (comp) => comp.comp_type !== "Excluded"
-    );
-    const excludedProperties = comparables.filter(
-      (comp) => comp.comp_type === "Excluded"
-    );
-
-    return {
-      includedCount: includedProperties.length,
-      excludedCount: excludedProperties.length,
-    };
-  };
+  // Removed unused calculateSummaryCounts function
 
   return (
     <div className="container mt-5">
@@ -583,7 +571,7 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
                               Math.min(
                                 ...comparables
                                   .filter((c) => c.comp_type === "Sale")
-                                  .map((c) => c.post_adj)
+                                  .map((c) => c.postAdj)
                               )
                           )}. The tighter the adjusted range suggests that the adjustments are more credible and reflective of the market.`
                         );
