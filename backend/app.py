@@ -1,21 +1,17 @@
-
-import os
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import xml.etree.ElementTree as ET
 
 app = Flask(__name__)
+# Simple CORS configuration - allow all origins
 CORS(app)
 
-# Cleaned up app.py for Elastic Beanstalk
-import os
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import xml.etree.ElementTree as ET
+@app.route('/api/health', methods=['GET'])
+@cross_origin()
+def health_check():
+    return jsonify({'status': 'ok', 'message': 'Sensitivity Analysis & GLA API is running'})
 
-app = Flask(__name__)
-CORS(app)
-
+# Sensitivity Analysis Functions
 def calculate_sensitivity(xml_file):
     try:
         pre_adj_values = []
@@ -25,12 +21,14 @@ def calculate_sensitivity(xml_file):
         comp_number = 0
         tree = ET.parse(xml_file)
         root = tree.getroot()
+        
         for comp in root.findall('.//COMPARABLE_SALE'):
             property_sequence_id = comp.get('PropertySequenceIdentifier')
             pre_adj = comp.get('PropertySalesAmount')
             post_adj = comp.get('AdjustedSalesPriceAmount')
             total_adj_percent = comp.get('SalePriceTotalAdjustmentNetPercent')
             sale_date = comp.get('SaleDate')
+            
             location = comp.find('.//LOCATION')
             if location is not None:
                 street = location.get('PropertyStreetAddress', 'Unknown')
@@ -106,8 +104,10 @@ def calculate_sensitivity(xml_file):
     except Exception as e:
         return {'error': f'An unexpected error occurred: {str(e)}'}
 
-@app.route('/api/calculate', methods=['POST'])
-def calculate():
+# Sensitivity Analysis Endpoint
+@app.route('/api/sensitivity/calculate', methods=['POST'])
+@cross_origin()
+def calculate_sensitivity_analysis():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
     file = request.files['file']
@@ -120,6 +120,73 @@ def calculate():
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
+# GLA Calculator Endpoint
+@app.route('/api/gla/calculate', methods=['POST', 'OPTIONS'])
+@cross_origin()
+def calculate_gla_adjustment():
+    if request.method == 'OPTIONS':
+        # Handle preflight request
+        return jsonify({'status': 'ok'})
+    
+    data = request.json
+    comparables = data.get('comparables', [])
+    
+    if not comparables:
+        return jsonify({'error': 'No comparables provided'}), 400
+    
+    # Validate and filter comparables
+    valid_comparables = []
+    for i, c in enumerate(comparables):
+        if not isinstance(c, dict) or 'sale_price' not in c or 'gla' not in c:
+            continue
+        
+        try:
+            sale_price = float(c['sale_price'])
+            gla = float(c['gla'])
+            
+            if sale_price <= 0 or gla <= 0:
+                continue
+                
+            valid_comparables.append({
+                'sale_price': sale_price,
+                'gla': gla,
+                'address': c.get('address', 'N/A'),
+                'original_index': i
+            })
+        except (ValueError, TypeError):
+            continue
+    
+    if len(valid_comparables) < 2:
+        return jsonify({'error': 'At least 2 valid comparables required'}), 400
+
+    # Calculate price per square foot for each comparable
+    for c in valid_comparables:
+        c['price_per_sf'] = c['sale_price'] / c['gla']
+
+    # Ratterman method: average price per square foot
+    avg_price_per_sf = sum(c['price_per_sf'] for c in valid_comparables) / len(valid_comparables)
+
+    # Calculate adjustment for each comparable
+    for c in valid_comparables:
+        c['gla_adjustment'] = (avg_price_per_sf - c['price_per_sf']) * c['gla']
+        c['adjusted_price'] = c['sale_price'] + c['gla_adjustment']
+
+    return jsonify({
+        'avg_price_per_sf': round(avg_price_per_sf, 2),
+        'total_comparables': len(comparables),
+        'valid_comparables': len(valid_comparables),
+        'comparables': valid_comparables
+    })
+
+# Backward compatibility endpoint for GLA calculator
+@app.route('/api/calculate', methods=['POST', 'OPTIONS'])
+@cross_origin()
+def calculate_gla_legacy():
+    """Legacy endpoint for backward compatibility"""
+    return calculate_gla_adjustment()
+
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8080))  # Default to 8080 if PORT is not set
-    app.run(debug=True, port=port)
+    import os
+    port = int(os.environ.get('PORT', 5002))
+    debug = os.environ.get('FLASK_ENV') != 'production'
+    app.run(debug=debug, host='0.0.0.0', port=port)

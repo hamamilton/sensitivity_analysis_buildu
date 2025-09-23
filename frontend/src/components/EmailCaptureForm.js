@@ -21,11 +21,11 @@ const EmailCaptureForm = ({ onEmailSubmit, initialEmail = 'demo@windsurf.ai' }) 
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      height: '100vh',
+      //height: '100vh',
       fontFamily: 'sans-serif'
     }}>
       <img src="logo192.png" alt="Logo" width="100" height="100" style={{ marginBottom: '20px' }}/>
-      <h2>Access the Sensitivity Analysis</h2>
+      <h2>Access the Property Analysis Tools</h2>
       <p>Please enter your email to continue:</p>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <input

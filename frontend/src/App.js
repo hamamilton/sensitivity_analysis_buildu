@@ -1,75 +1,44 @@
-import React, { useState } from 'react';
-import Header from './components/Header';
-import EmailCaptureForm from './components/EmailCaptureForm';
-import SensitivityCalculator from './components/SensitivityCalculator';
-import FileUploadForm from './components/FileUploadForm';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { AuthProvider } from './contexts/AuthContext';
+import Navigation from './components/Navigation';
+import HomePage from './components/HomePage';
+import LoginPage from './components/LoginPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import SensitivityAnalysisPage from './components/SensitivityAnalysisPage';
+import GLACalculator from './components/GLACalculator';
 
 function App() {
-  const [step, setStep] = useState('email');
-  const [userEmail, setUserEmail] = useState('demo@windsurf.ai');
-  const [uploadedFile, setUploadedFile] = useState(null);
-
-  const handleEmailSubmit = (email) => {
-    setUserEmail(email);
-    setStep('fileUpload');
-  };
-
-  const handleFileUpload = (file) => {
-    setUploadedFile(file);
-    setStep('calculator');
-  };
-
-  const handleReset = () => {
-    setUploadedFile(null);
-    setStep('fileUpload');
-  };
-
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const renderCurrentStep = () => {
-    switch (step) {
-      case 'email':
-        return (
-          <EmailCaptureForm 
-            onEmailSubmit={handleEmailSubmit} 
-            initialEmail="demo@windsurf.ai"
-          />
-        );
-      case 'fileUpload':
-        return (
-          <FileUploadForm 
-            userEmail={userEmail} 
-            onFileUpload={handleFileUpload} 
-          />
-        );
-      case 'calculator':
-        return (
-          <SensitivityCalculator 
-            userEmail={userEmail} 
-            initialFile={uploadedFile}
-          />
-        );
-      default:
-        return (
-          <EmailCaptureForm 
-            onEmailSubmit={handleEmailSubmit} 
-            initialEmail="demo@windsurf.ai"
-          />
-        );
-    }
-  };
-
   return (
-    <div className="App">
-      <Header 
-        onReset={handleReset}
-        onPrint={handlePrint}
-        showButtons={step === 'calculator'}
-      />
-      {renderCurrentStep()}
-    </div>
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <Navigation />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route 
+              path="/sensitivity-analysis" 
+              element={
+                <ProtectedRoute>
+                  <SensitivityAnalysisPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/gla-calculator" 
+              element={
+                <ProtectedRoute>
+                  <GLACalculator />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

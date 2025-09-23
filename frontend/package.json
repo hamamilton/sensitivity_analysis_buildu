@@ -11,17 +11,25 @@
     "bootstrap": "^5.3.5",
     "chart.js": "^4.4.9",
     "http-proxy-middleware": "^3.0.3",
+    "papaparse": "^5.5.3",
     "react": "^19.0.0",
+    "react-bootstrap": "^2.10.10",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",
+    "react-router-bootstrap": "^0.26.3",
+    "react-router-dom": "^7.9.1",
     "react-scripts": "^5.0.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:analyze": "npm run build && npx serve -s build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy:vercel": "vercel --prod",
+    "preview": "vercel"
   },
   "eslintConfig": {
     "extends": [

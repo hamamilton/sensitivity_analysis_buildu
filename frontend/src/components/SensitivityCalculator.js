@@ -6,24 +6,25 @@ import {
   CategoryScale,
   LinearScale,
   PointElement,
-  LineElement, // Import LineElement
+  LineController,
+  LineElement,
   Tooltip,
   Legend,
 } from "chart.js";
 import { Scatter } from "react-chartjs-2";
 
-// Register Chart.js components
+// Register Chart.js components with the corrected capitalization
 ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
+  LineController, // Corrected from 'Linecontroller'
   LineElement,
   Tooltip,
   Legend
 );
 
 const SensitivityCalculator = ({ userEmail, initialFile }) => {
-  // Removed unused file and setFile state
   const [subjectProperty, setSubjectProperty] = useState(null);
   const [comparables, setComparables] = useState([]);
   const [error, setError] = useState(null);
@@ -47,15 +48,14 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
         const formData = new FormData();
         formData.append('file', initialFile);
 
-        // Configurable axios call with full URL and timeout
         const response = await axios({
           method: 'post',
-          url: process.env.REACT_APP_UPLOAD_URL || 'http://localhost:8080/api/calculate',
+          url: process.env.REACT_APP_API_URL || 'http://localhost:5002/api/sensitivity/calculate',
           data: formData,
           headers: {
             'Content-Type': 'multipart/form-data'
           },
-          timeout: 10000 // 10 seconds timeout
+          timeout: 10000
         });
 
         if (response.data) {
@@ -67,18 +67,14 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
       } catch (err) {
         console.error('File processing error:', err);
         
-        // More detailed error logging
         if (err.response) {
-          // The request was made and the server responded with a status code
           console.error('Server responded with:', err.response.data);
           console.error('Status code:', err.response.status);
           setError(`Server error: ${err.response.data.message || 'Unknown error'}`);
         } else if (err.request) {
-          // The request was made but no response was received
           console.error('No response received:', err.request);
           setError('No response from server. Please check your network connection.');
         } else {
-          // Something happened in setting up the request
           console.error('Error setting up request:', err.message);
           setError(`Request setup error: ${err.message}`);
         }
@@ -93,31 +89,28 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
   const scatterData = () => {
     if (!comparables.length) return null;
 
-    // Filter out listing properties
     const salesOnly = comparables.filter((comp) => comp.comp_type === "Sale");
 
-    // Function to create a custom rotated triangle canvas
     const createRotatedTriangle = (rotation) => {
-      const size = 10; // Size of the triangle
+      const size = 10;
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       canvas.width = size * 2;
       canvas.height = size * 2;
-      ctx.translate(size, size); // Move to the center of the canvas
-      ctx.rotate(rotation); // Rotate the triangle
+      ctx.translate(size, size);
+      ctx.rotate(rotation);
       ctx.beginPath();
-      ctx.moveTo(0, -size); // Top point
-      ctx.lineTo(size, size); // Bottom-right point
-      ctx.lineTo(-size, size); // Bottom-left point
+      ctx.moveTo(0, -size);
+      ctx.lineTo(size, size);
+      ctx.lineTo(-size, size);
       ctx.closePath();
-      ctx.fillStyle = "blue"; // Set the fill color
+      ctx.fillStyle = "blue";
       ctx.fill();
       return canvas;
     };
 
-    // Predefine upward and downward triangles
-    const upwardTriangle = createRotatedTriangle(0); // No rotation
-    const downwardTriangle = createRotatedTriangle(Math.PI); // 180-degree rotation
+    const upwardTriangle = createRotatedTriangle(0);
+    const downwardTriangle = createRotatedTriangle(Math.PI);
 
     const preAdjPoints = salesOnly.map((comp, index) => ({
       x: index + 1,
@@ -126,7 +119,7 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
       postAdj: comp.post_adj,
       percentChange: (comp.post_adj - comp.pre_adj) / comp.pre_adj,
       pointStyle:
-        comp.post_adj > comp.pre_adj ? upwardTriangle : downwardTriangle, // Use predefined triangles
+        comp.post_adj > comp.pre_adj ? upwardTriangle : downwardTriangle,
     }));
 
     const postAdjPoints = salesOnly.map((comp, index) => ({
@@ -135,7 +128,7 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
       address: comp.address,
       preAdj: comp.pre_adj,
       percentChange: (comp.post_adj - comp.pre_adj) / comp.pre_adj,
-      pointStyle: "circle", // Post-adjustment points are always circles
+      pointStyle: "circle",
     }));
 
     const subjectLine = Array.from(
@@ -152,15 +145,15 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
           label: "Pre-Adjustment Sale Price",
           data: preAdjPoints,
           backgroundColor: "blue",
-          pointStyle: preAdjPoints.map((point) => point.pointStyle), // Apply triangle orientation
-          radius: 10, // Increase the size of the triangles
+          pointStyle: preAdjPoints.map((point) => point.pointStyle),
+          radius: 10,
         },
         {
           label: "Post-Adjustment Sale Price",
           data: postAdjPoints,
           backgroundColor: "green",
-          pointStyle: "circle", // Post-adjustment points are always circles
-          radius: 10, // Increase the size of the circles
+          pointStyle: "circle",
+          radius: 10,
         },
         {
           label: `Subject Sale Price: ${formatCurrency(
@@ -169,15 +162,15 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
           data: subjectLine,
           borderColor: "red",
           borderWidth: 2,
-          pointRadius: 0, // Hide points for the line
-          type: "line", // Render as a line
+          pointRadius: 0,
+          type: "line",
         },
       ],
     };
   };
 
   const formatCurrency = (value) => {
-    if (value === "N/A") return value; // Handle "N/A" values
+    if (value === "N/A") return value;
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
@@ -185,11 +178,11 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
   };
 
   const formatPercent = (value, multiplyBy100 = true) => {
-    if (value === "N/A") return value; // Handle "N/A" values
+    if (value === "N/A") return value;
     const percentValue = multiplyBy100
       ? parseFloat(value) * 100
       : parseFloat(value);
-    return `${percentValue.toFixed(2)}%`; // Format to 2 decimal points
+    return `${percentValue.toFixed(2)}%`;
   };
 
   const scatterOptions = {
@@ -200,7 +193,6 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
             const datasetLabel = context.dataset.label;
             const dataPoint = context.raw || {};
 
-            // Check if the dataset is the Subject Sale Price line
             if (datasetLabel === "Subject Sale Price") {
               return `Subject Property Sold Price: ${formatCurrency(
                 dataPoint.y
@@ -222,10 +214,8 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
       },
       afterDatasetsDraw: (chart) => {
         const { ctx, data } = chart;
-
-        // Draw lines between pre- and post-adjustment points
-        const preDataset = data.datasets[0].data; // Pre-Adjustment
-        const postDataset = data.datasets[1].data; // Post-Adjustment
+        const preDataset = data.datasets[0].data;
+        const postDataset = data.datasets[1].data;
 
         ctx.save();
         ctx.strokeStyle = "gray";
@@ -256,8 +246,8 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
           text: "Comparable Sales",
         },
         ticks: {
-          stepSize: 1, // Set step size to 1
-          min: 1, // Start the x-axis at 1 to hide step "0"
+          stepSize: 1,
+          min: 1,
         },
       },
       y: {
@@ -269,13 +259,11 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
     },
     elements: {
       point: {
-        radius: 10, // Increase the size of the dots
+        radius: 10,
         hoverRadius: 10,
       },
     },
   };
-
-  // Removed unused calculateSummaryCounts function
 
   return (
     <div className="container mt-5">
@@ -298,9 +286,7 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
         <div className="container-fluid mt-5">
           <h1 className="mb-4 text-center">Adjustment Sensitivity Analysis</h1>
           <div className="row justify-content-center">
-            {/* Main Content: Results and Charts */}
             <div className="col-lg-10 col-md-12">
-              {/* Results Summary Card */}
               {comparables.length > 0 && (
                 <div className="card mb-4 border-info">
                   <div className="card-header text-white bg-info">
@@ -448,7 +434,6 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
                 </div>
               )}
 
-              {/* Analysis Explanation Card */}
               {comparables.length > 0 && (
                 <div className="card mb-4 border-info">
                   <div className="card-header text-white bg-info">
@@ -571,7 +556,7 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
                               Math.min(
                                 ...comparables
                                   .filter((c) => c.comp_type === "Sale")
-                                  .map((c) => c.postAdj)
+                                  .map((c) => c.post_adj)
                               )
                           )}. The tighter the adjusted range suggests that the adjustments are more credible and reflective of the market.`
                         );
@@ -584,7 +569,6 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
                 </div>
               )}
 
-              {/* Scatter Plot Card */}
               {scatterData() && (
                 <div className="card mb-4 border-info">
                   <div className="card-header bg-info text-white">
@@ -596,7 +580,6 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
                 </div>
               )}
 
-              {/* Properties List Card */}
               {comparables.length > 0 && (
                 <div className="card mb-4 border-info">
                   <div className="card-header text-white bg-info">
