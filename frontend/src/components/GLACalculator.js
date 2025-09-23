@@ -127,7 +127,7 @@ const GLACalculator = () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        timeout: 10000
+        timeout: 60000  // Increased to 60 seconds for Render cold starts
       });
       
       setResults(response.data);

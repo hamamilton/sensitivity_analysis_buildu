@@ -55,7 +55,7 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
           headers: {
             'Content-Type': 'multipart/form-data'
           },
-          timeout: 10000
+          timeout: 60000  // Increased to 60 seconds for Render cold starts
         });
 
         if (response.data) {
