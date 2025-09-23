@@ -152,6 +152,7 @@ def calculate_gla_adjustment():
         for i, comp in enumerate(comparables):
             comp_gla = float(comp['gla'])
             comp_price = float(comp['price'])
+            comp_address = comp.get('address', 'N/A')  # Get address with fallback
             
             # Calculate price per square foot
             price_per_sqft = comp_price / comp_gla
@@ -172,6 +173,7 @@ def calculate_gla_adjustment():
             
             result = {
                 'comparable_number': i + 1,
+                'address': comp_address,
                 'original_gla': comp_gla,
                 'original_price': comp_price,
                 'price_per_sqft': round(price_per_sqft, 2),
