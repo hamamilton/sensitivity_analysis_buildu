@@ -5,10 +5,10 @@ services:
     plan: free
     rootDir: backend
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn --bind 0.0.0.0:$PORT app:app"
+    startCommand: "gunicorn --bind 0.0.0.0:$PORT application:application"
     envVars:
       - key: FLASK_ENV
         value: production
       - key: FLASK_APP
-        value: app.py
+        value: application.py
     healthCheckPath: /api/health
