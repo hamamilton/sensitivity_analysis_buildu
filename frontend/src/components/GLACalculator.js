@@ -29,6 +29,7 @@ const formatNumber = (number) => {
 };
 
 const GLACalculator = () => {
+  const [subjectGLA, setSubjectGLA] = useState('');
   const [comparables, setComparables] = useState([
     { sale_price: '', gla: '', address: '' }
   ]);
@@ -39,7 +40,7 @@ const GLACalculator = () => {
   const [editingField, setEditingField] = useState(null);
 
   // Get API URL from environment variable
-  const API_URL = process.env.REACT_APP_GLA_API_URL || 'http://localhost:5002/api/calculate';
+  const API_URL = process.env.REACT_APP_GLA_API_URL || 'https://sensitivity-analysis-backend.onrender.com/api/calculate';
 
   // Load saved mapping from localStorage on component mount
   useEffect(() => {
@@ -113,8 +114,9 @@ const GLACalculator = () => {
     
     try {
       const payload = {
+        subject_gla: parseFloat(subjectGLA),
         comparables: comparables.map(c => ({
-          sale_price: parseFloat(c.sale_price),
+          price: parseFloat(c.sale_price),
           gla: parseFloat(c.gla),
           address: c.address || 'N/A'
         }))
@@ -180,6 +182,30 @@ const GLACalculator = () => {
         </Card.Header>
         <Card.Body>
           <Form onSubmit={handleSubmit}>
+            {/* Subject Property GLA Input */}
+            <Row className="mb-3">
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label><strong>Subject Property GLA (sq ft)</strong></Form.Label>
+                  <Form.Control
+                    type="text"
+                    required
+                    value={subjectGLA}
+                    onChange={e => {
+                      const rawValue = e.target.value.replace(/[,]/g, '');
+                      setSubjectGLA(rawValue);
+                    }}
+                    placeholder="e.g., 2000"
+                    title="Enter the subject property's GLA in square feet"
+                  />
+                  <Form.Text className="text-muted">
+                    Enter the GLA of the property you want to analyze
+                  </Form.Text>
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <h5 className="mb-3">Comparables</h5>
             <Table responsive bordered>
               <thead>
                 <tr>

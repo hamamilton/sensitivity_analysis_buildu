@@ -50,7 +50,7 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
 
         const response = await axios({
           method: 'post',
-          url: process.env.REACT_APP_API_URL || 'http://localhost:5002/api/sensitivity/calculate',
+          url: process.env.REACT_APP_API_URL || 'https://sensitivity-analysis-backend.onrender.com/api/sensitivity/calculate',
           data: formData,
           headers: {
             'Content-Type': 'multipart/form-data'
