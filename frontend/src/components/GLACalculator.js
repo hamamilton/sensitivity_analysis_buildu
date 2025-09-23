@@ -301,24 +301,24 @@ const GLACalculator = () => {
               <Col md={4}>
                 <Card className="text-center">
                   <Card.Body>
-                    <Card.Title>Average Price per Sq Ft</Card.Title>
-                    <h4 className="text-primary">{formatCurrency(results.avg_price_per_sf, 2)}</h4>
+                    <Card.Title>Subject Property GLA</Card.Title>
+                    <h4 className="text-primary">{formatNumber(results.subject_gla)} sq ft</h4>
                   </Card.Body>
                 </Card>
               </Col>
               <Col md={4}>
                 <Card className="text-center">
                   <Card.Body>
-                    <Card.Title>Total Comparables</Card.Title>
-                    <h4 className="text-info">{formatNumber(results.total_comparables)}</h4>
+                    <Card.Title>Number of Comparables</Card.Title>
+                    <h4 className="text-info">{formatNumber(results.summary.number_of_comparables)}</h4>
                   </Card.Body>
                 </Card>
               </Col>
               <Col md={4}>
                 <Card className="text-center">
                   <Card.Body>
-                    <Card.Title>Valid Comparables</Card.Title>
-                    <h4 className="text-success">{formatNumber(results.valid_comparables)}</h4>
+                    <Card.Title>Average Adjusted Price</Card.Title>
+                    <h4 className="text-success">{formatCurrency(results.summary.average_adjusted_price)}</h4>
                   </Card.Body>
                 </Card>
               </Col>
@@ -337,16 +337,16 @@ const GLACalculator = () => {
                         <Card.Title className="text-primary">Original Sale Prices</Card.Title>
                         <div className="d-flex justify-content-between align-items-center mb-2">
                           <span className="text-muted">Low:</span>
-                          <strong>{formatCurrency(Math.min(...results.comparables.map(c => c.sale_price)))}</strong>
+                          <strong>{formatCurrency(Math.min(...results.comparables_analysis.map(c => c.original_price)))}</strong>
                         </div>
                         <div className="d-flex justify-content-between align-items-center mb-2">
                           <span className="text-muted">High:</span>
-                          <strong>{formatCurrency(Math.max(...results.comparables.map(c => c.sale_price)))}</strong>
+                          <strong>{formatCurrency(Math.max(...results.comparables_analysis.map(c => c.original_price)))}</strong>
                         </div>
                         <div className="d-flex justify-content-between align-items-center">
                           <span className="text-muted">Range:</span>
                           <strong className="text-info">
-                            {formatCurrency(Math.max(...results.comparables.map(c => c.sale_price)) - Math.min(...results.comparables.map(c => c.sale_price)))}
+                            {formatCurrency(Math.max(...results.comparables_analysis.map(c => c.original_price)) - Math.min(...results.comparables_analysis.map(c => c.original_price)))}
                           </strong>
                         </div>
                       </Card.Body>
@@ -358,16 +358,16 @@ const GLACalculator = () => {
                         <Card.Title className="text-success">GLA Adjusted Prices</Card.Title>
                         <div className="d-flex justify-content-between align-items-center mb-2">
                           <span className="text-muted">Low:</span>
-                          <strong>{formatCurrency(Math.min(...results.comparables.map(c => c.adjusted_price)))}</strong>
+                          <strong>{formatCurrency(Math.min(...results.comparables_analysis.map(c => c.adjusted_price)))}</strong>
                         </div>
                         <div className="d-flex justify-content-between align-items-center mb-2">
                           <span className="text-muted">High:</span>
-                          <strong>{formatCurrency(Math.max(...results.comparables.map(c => c.adjusted_price)))}</strong>
+                          <strong>{formatCurrency(Math.max(...results.comparables_analysis.map(c => c.adjusted_price)))}</strong>
                         </div>
                         <div className="d-flex justify-content-between align-items-center">
                           <span className="text-muted">Range:</span>
                           <strong className="text-success">
-                            {formatCurrency(Math.max(...results.comparables.map(c => c.adjusted_price)) - Math.min(...results.comparables.map(c => c.adjusted_price)))}
+                            {formatCurrency(Math.max(...results.comparables_analysis.map(c => c.adjusted_price)) - Math.min(...results.comparables_analysis.map(c => c.adjusted_price)))}
                           </strong>
                         </div>
                       </Card.Body>
@@ -377,12 +377,12 @@ const GLACalculator = () => {
                 <div className="text-center mt-3">
                   <small className="text-muted">
                     Range Reduction: {formatCurrency(
-                      (Math.max(...results.comparables.map(c => c.sale_price)) - Math.min(...results.comparables.map(c => c.sale_price))) -
-                      (Math.max(...results.comparables.map(c => c.adjusted_price)) - Math.min(...results.comparables.map(c => c.adjusted_price)))
+                      (Math.max(...results.comparables_analysis.map(c => c.original_price)) - Math.min(...results.comparables_analysis.map(c => c.original_price))) -
+                      (Math.max(...results.comparables_analysis.map(c => c.adjusted_price)) - Math.min(...results.comparables_analysis.map(c => c.adjusted_price)))
                     )} 
-                    ({(((Math.max(...results.comparables.map(c => c.sale_price)) - Math.min(...results.comparables.map(c => c.sale_price))) -
-                      (Math.max(...results.comparables.map(c => c.adjusted_price)) - Math.min(...results.comparables.map(c => c.adjusted_price)))) /
-                      (Math.max(...results.comparables.map(c => c.sale_price)) - Math.min(...results.comparables.map(c => c.sale_price))) * 100).toFixed(1)}% reduction)
+                    ({(((Math.max(...results.comparables_analysis.map(c => c.original_price)) - Math.min(...results.comparables_analysis.map(c => c.original_price))) -
+                      (Math.max(...results.comparables_analysis.map(c => c.adjusted_price)) - Math.min(...results.comparables_analysis.map(c => c.adjusted_price)))) /
+                      (Math.max(...results.comparables_analysis.map(c => c.original_price)) - Math.min(...results.comparables_analysis.map(c => c.original_price))) * 100).toFixed(1)}% reduction)
                   </small>
                 </div>
               </Card.Body>
@@ -402,13 +402,13 @@ const GLACalculator = () => {
                 </tr>
               </thead>
               <tbody>
-                {results.comparables.map((c, idx) => (
+                {results.comparables_analysis.map((c, idx) => (
                   <tr key={idx}>
-                    <td>{c.original_index !== undefined ? c.original_index + 1 : idx + 1}</td>
+                    <td>{c.comparable_number || idx + 1}</td>
                     <td>{c.address || 'N/A'}</td>
-                    <td>{formatCurrency(c.sale_price)}</td>
-                    <td>{formatNumber(c.gla)}</td>
-                    <td>{formatCurrency(c.price_per_sf, 2)}</td>
+                    <td>{formatCurrency(c.original_price)}</td>
+                    <td>{formatNumber(c.original_gla)}</td>
+                    <td>{formatCurrency(c.price_per_sqft, 2)}</td>
                     <td className={c.gla_adjustment >= 0 ? 'text-success' : 'text-danger'}>
                       {c.gla_adjustment >= 0 ? '+' : ''}{formatCurrency(Math.abs(c.gla_adjustment))}
                     </td>
