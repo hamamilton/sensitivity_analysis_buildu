@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 import xml.etree.ElementTree as ET
 
+# Deployment timestamp: 2025-09-23 - Backend redeployment with fixed endpoints
 app = Flask(__name__)
 CORS(app)
 
