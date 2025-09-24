@@ -119,8 +119,8 @@ def sensitivity_calculate():
 @cross_origin()
 def calculate_gla_adjustment():
     """
-    Calculate GLA adjustment using Ratterman method
-    Accepts JSON data with property details and comparables
+    Calculate GLA adjustment using proper Ratterman method
+    Adjusts each comparable to market average price per square foot
     """
     try:
         data = request.get_json()
@@ -128,59 +128,61 @@ def calculate_gla_adjustment():
         if not data:
             return jsonify({"error": "No data provided"}), 400
         
-        required_fields = ['subject_gla', 'comparables']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({"error": f"Missing required field: {field}"}), 400
-        
-        subject_gla = float(data['subject_gla'])
-        comparables = data['comparables']
+        # Extract comparables (subject_gla is optional for this method)
+        comparables = data.get('comparables', [])
+        subject_gla = data.get('subject_gla')  # Optional
         
         if not comparables or len(comparables) == 0:
             return jsonify({"error": "At least one comparable is required"}), 400
         
-        # Validate comparables
+        # Validate and filter comparables
+        valid_comparables = []
         for i, comp in enumerate(comparables):
             required_comp_fields = ['gla', 'price']
             for field in required_comp_fields:
                 if field not in comp:
                     return jsonify({"error": f"Comparable {i+1} missing field: {field}"}), 400
+            
+            try:
+                comp_gla = float(comp['gla'])
+                comp_price = float(comp['price'])
+                comp_address = comp.get('address', 'N/A')
+                
+                if comp_price <= 0 or comp_gla <= 0:
+                    continue
+                    
+                valid_comparables.append({
+                    'comparable_number': i + 1,
+                    'address': comp_address,
+                    'original_gla': comp_gla,
+                    'original_price': comp_price,
+                    'price_per_sqft': round(comp_price / comp_gla, 2)
+                })
+            except (ValueError, TypeError):
+                continue
         
-        # Calculate GLA adjustments using Ratterman method
+        if len(valid_comparables) < 1:
+            return jsonify({"error": "At least one valid comparable required"}), 400
+        
+        # Ratterman method: calculate average price per square foot
+        avg_price_per_sqft = sum(c['price_per_sqft'] for c in valid_comparables) / len(valid_comparables)
+        
+        # Calculate GLA adjustment for each comparable
         results = []
-        
-        for i, comp in enumerate(comparables):
-            comp_gla = float(comp['gla'])
-            comp_price = float(comp['price'])
-            comp_address = comp.get('address', 'N/A')  # Get address with fallback
-            
-            # Calculate price per square foot
-            price_per_sqft = comp_price / comp_gla
-            
-            # Calculate GLA difference
-            gla_difference = subject_gla - comp_gla
-            
-            # Apply Ratterman method - using a standard adjustment rate
-            # This can be customized based on market conditions
-            if gla_difference != 0:
-                adjustment_rate = price_per_sqft * 0.6  # 60% of price per sqft (Ratterman standard)
-                gla_adjustment = gla_difference * adjustment_rate
-            else:
-                gla_adjustment = 0
-            
-            # Calculate adjusted price
-            adjusted_price = comp_price + gla_adjustment
+        for comp in valid_comparables:
+            # Ratterman adjustment: (market_avg - comp_price_per_sf) × comp_gla
+            gla_adjustment = (avg_price_per_sqft - comp['price_per_sqft']) * comp['original_gla']
+            adjusted_price = comp['original_price'] + gla_adjustment
             
             result = {
-                'comparable_number': i + 1,
-                'address': comp_address,
-                'original_gla': comp_gla,
-                'original_price': comp_price,
-                'price_per_sqft': round(price_per_sqft, 2),
-                'gla_difference': gla_difference,
-                'adjustment_rate': round(adjustment_rate, 2) if gla_difference != 0 else 0,
+                'comparable_number': comp['comparable_number'],
+                'address': comp['address'],
+                'original_gla': comp['original_gla'],
+                'original_price': comp['original_price'],
+                'price_per_sqft': comp['price_per_sqft'],
                 'gla_adjustment': round(gla_adjustment, 2),
-                'adjusted_price': round(adjusted_price, 2)
+                'adjusted_price': round(adjusted_price, 2),
+                'adjustment_rate': round(avg_price_per_sqft, 2)  # Market average rate
             }
             
             results.append(result)
@@ -190,10 +192,11 @@ def calculate_gla_adjustment():
         avg_adjusted_price = sum(adjusted_prices) / len(adjusted_prices)
         
         response_data = {
-            'subject_gla': subject_gla,
+            'subject_gla': subject_gla,  # Optional, may be null
             'comparables_analysis': results,
             'summary': {
                 'average_adjusted_price': round(avg_adjusted_price, 2),
+                'average_price_per_sqft': round(avg_price_per_sqft, 2),
                 'number_of_comparables': len(results)
             }
         }

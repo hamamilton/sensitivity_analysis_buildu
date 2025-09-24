@@ -114,13 +114,17 @@ const GLACalculator = () => {
     
     try {
       const payload = {
-        subject_gla: parseFloat(subjectGLA),
         comparables: comparables.map(c => ({
           price: parseFloat(c.sale_price),
           gla: parseFloat(c.gla),
           address: c.address || 'N/A'
         }))
       };
+
+      // Add subject_gla only if provided
+      if (subjectGLA && subjectGLA.trim() !== '') {
+        payload.subject_gla = parseFloat(subjectGLA);
+      }
       
       const response = await axios({
         method: 'post',
@@ -182,24 +186,26 @@ const GLACalculator = () => {
         </Card.Header>
         <Card.Body>
           <Form onSubmit={handleSubmit}>
-            {/* Subject Property GLA Input */}
+            {/* Subject Property GLA Input - Optional */}
             <Row className="mb-3">
               <Col md={6}>
                 <Form.Group>
-                  <Form.Label><strong>Subject Property GLA (sq ft)</strong></Form.Label>
+                  <Form.Label>
+                    <strong>Subject Property GLA (sq ft)</strong> 
+                    <span className="text-muted"> - optional</span>
+                  </Form.Label>
                   <Form.Control
                     type="text"
-                    required
                     value={subjectGLA}
                     onChange={e => {
                       const rawValue = e.target.value.replace(/[,]/g, '');
                       setSubjectGLA(rawValue);
                     }}
-                    placeholder="e.g., 2000"
-                    title="Enter the subject property's GLA in square feet"
+                    placeholder="e.g., 2000 (optional - for reference only)"
+                    title="Subject property GLA is optional for Ratterman method"
                   />
                   <Form.Text className="text-muted">
-                    Enter the GLA of the property you want to analyze
+                    The Ratterman method uses market averages - subject GLA not required for calculations
                   </Form.Text>
                 </Form.Group>
               </Col>
