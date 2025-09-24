@@ -164,14 +164,19 @@ def calculate_gla_adjustment():
         if len(valid_comparables) < 1:
             return jsonify({"error": "At least one valid comparable required"}), 400
         
-        # Ratterman method: calculate average price per square foot
+        # Ratterman method: calculate averages
         avg_price_per_sqft = sum(c['price_per_sqft'] for c in valid_comparables) / len(valid_comparables)
+        avg_gla = sum(c['original_gla'] for c in valid_comparables) / len(valid_comparables)
         
         # Calculate GLA adjustment for each comparable
         results = []
         for comp in valid_comparables:
-            # Ratterman adjustment: (market_avg - comp_price_per_sf) × comp_gla
-            gla_adjustment = (avg_price_per_sqft - comp['price_per_sqft']) * comp['original_gla']
+            # Calculate differences and adjustments
+            price_per_sqft_diff = avg_price_per_sqft - comp['price_per_sqft']
+            gla_diff_from_avg = comp['original_gla'] - avg_gla
+            
+            # Ratterman adjustment: (market_avg_price_per_sf - comp_price_per_sf) × comp_gla
+            gla_adjustment = price_per_sqft_diff * comp['original_gla']
             adjusted_price = comp['original_price'] + gla_adjustment
             
             result = {
@@ -180,9 +185,15 @@ def calculate_gla_adjustment():
                 'original_gla': comp['original_gla'],
                 'original_price': comp['original_price'],
                 'price_per_sqft': comp['price_per_sqft'],
+                'gla_diff_from_avg': round(gla_diff_from_avg, 0),
+                'price_per_sqft_diff': round(price_per_sqft_diff, 2),
+                'adjustment_per_sqft': round(price_per_sqft_diff, 2),  # Same as price_per_sqft_diff for clarity
                 'gla_adjustment': round(gla_adjustment, 2),
                 'adjusted_price': round(adjusted_price, 2),
-                'adjustment_rate': round(avg_price_per_sqft, 2)  # Market average rate
+                'calculation_breakdown': {
+                    'formula': f"({avg_price_per_sqft:.2f} - {comp['price_per_sqft']:.2f}) × {comp['original_gla']:.0f}",
+                    'step_by_step': f"{price_per_sqft_diff:.2f} × {comp['original_gla']:.0f} = {gla_adjustment:.2f}"
+                }
             }
             
             results.append(result)
@@ -197,7 +208,9 @@ def calculate_gla_adjustment():
             'summary': {
                 'average_adjusted_price': round(avg_adjusted_price, 2),
                 'average_price_per_sqft': round(avg_price_per_sqft, 2),
-                'number_of_comparables': len(results)
+                'average_gla': round(avg_gla, 0),
+                'number_of_comparables': len(results),
+                'calculation_method': 'Ratterman Method - Market Average Price Per Square Foot'
             }
         }
         

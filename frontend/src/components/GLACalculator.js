@@ -304,15 +304,17 @@ const GLACalculator = () => {
           <Card.Body>
             {/* Summary Cards */}
             <Row className="mb-4">
-              <Col md={4}>
+              <Col md={3}>
                 <Card className="text-center">
                   <Card.Body>
                     <Card.Title>Subject Property GLA</Card.Title>
-                    <h4 className="text-primary">{formatNumber(results.subject_gla)} sq ft</h4>
+                    <h4 className="text-primary">
+                      {results.subject_gla ? formatNumber(results.subject_gla) + ' sq ft' : 'Optional'}
+                    </h4>
                   </Card.Body>
                 </Card>
               </Col>
-              <Col md={4}>
+              <Col md={3}>
                 <Card className="text-center">
                   <Card.Body>
                     <Card.Title>Number of Comparables</Card.Title>
@@ -320,15 +322,32 @@ const GLACalculator = () => {
                   </Card.Body>
                 </Card>
               </Col>
-              <Col md={4}>
+              <Col md={3}>
                 <Card className="text-center">
                   <Card.Body>
-                    <Card.Title>Average Adjusted Price</Card.Title>
-                    <h4 className="text-success">{formatCurrency(results.summary.average_adjusted_price)}</h4>
+                    <Card.Title>Average GLA</Card.Title>
+                    <h4 className="text-warning">{formatNumber(results.summary.average_gla)} sq ft</h4>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={3}>
+                <Card className="text-center">
+                  <Card.Body>
+                    <Card.Title>Market Avg $/Sq Ft</Card.Title>
+                    <h4 className="text-success">${formatNumber(results.summary.average_price_per_sqft, 2)}</h4>
                   </Card.Body>
                 </Card>
               </Col>
             </Row>
+
+            {/* Calculation Method */}
+            <Alert variant="info" className="mb-4">
+              <strong>Ratterman Method:</strong> Each comparable is adjusted to the market average price per square foot.
+              <br />
+              <small className="text-muted">
+                Formula: (Market Avg $/sqft - Comparable $/sqft) × Comparable GLA = GLA Adjustment
+              </small>
+            </Alert>
             
             {/* Price Range Analysis Card */}
             <Card className="mb-4 border-secondary">
@@ -395,34 +414,77 @@ const GLACalculator = () => {
             </Card>
             
             {/* Results Table */}
-            <Table responsive bordered>
-              <thead>
+            <Table responsive bordered className="table-hover">
+              <thead className="table-dark">
                 <tr>
-                  <th>#</th>
+                  <th className="text-center">#</th>
                   <th>Address</th>
-                  <th>Sale Price</th>
-                  <th>GLA (sq ft)</th>
-                  <th>Price/Sq Ft</th>
-                  <th>GLA Adjustment</th>
-                  <th>Adjusted Price</th>
+                  <th className="text-center">Sale Price</th>
+                  <th className="text-center">GLA (sq ft)</th>
+                  <th className="text-center">$/Sq Ft</th>
+                  <th className="text-center">GLA vs Avg</th>
+                  <th className="text-center">Adj/Sq Ft</th>
+                  <th className="text-center">GLA Adjustment</th>
+                  <th className="text-center">Adjusted Price</th>
                 </tr>
               </thead>
               <tbody>
                 {results.comparables_analysis.map((c, idx) => (
                   <tr key={idx}>
-                    <td>{c.comparable_number || idx + 1}</td>
+                    <td className="text-center">{c.comparable_number || idx + 1}</td>
                     <td>{c.address || 'N/A'}</td>
-                    <td>{formatCurrency(c.original_price)}</td>
-                    <td>{formatNumber(c.original_gla)}</td>
-                    <td>{formatCurrency(c.price_per_sqft, 2)}</td>
-                    <td className={c.gla_adjustment >= 0 ? 'text-success' : 'text-danger'}>
-                      {c.gla_adjustment >= 0 ? '+' : ''}{formatCurrency(Math.abs(c.gla_adjustment))}
+                    <td className="text-center">{formatCurrency(c.original_price)}</td>
+                    <td className="text-center">{formatNumber(c.original_gla)}</td>
+                    <td className="text-center">{formatCurrency(c.price_per_sqft, 2)}</td>
+                    <td className="text-center">
+                      <span className={c.gla_diff_from_avg >= 0 ? 'text-success' : 'text-danger'}>
+                        {c.gla_diff_from_avg >= 0 ? '+' : ''}{formatNumber(Math.abs(c.gla_diff_from_avg))}
+                      </span>
                     </td>
-                    <td>{formatCurrency(c.adjusted_price)}</td>
+                    <td className="text-center">
+                      <span className={c.adjustment_per_sqft >= 0 ? 'text-success' : 'text-danger'}>
+                        {c.adjustment_per_sqft >= 0 ? '+' : ''}${formatNumber(Math.abs(c.adjustment_per_sqft), 2)}
+                      </span>
+                    </td>
+                    <td className="text-center">
+                      <div>
+                        <span className={c.gla_adjustment >= 0 ? 'text-success' : 'text-danger'}>
+                          {c.gla_adjustment >= 0 ? '+' : ''}{formatCurrency(Math.abs(c.gla_adjustment))}
+                        </span>
+                        {c.calculation_breakdown && (
+                          <>
+                            <br />
+                            <small className="text-muted" style={{fontSize: '0.7em'}}>
+                              {c.calculation_breakdown.step_by_step}
+                            </small>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                    <td className="text-center fw-bold">{formatCurrency(c.adjusted_price)}</td>
                   </tr>
                 ))}
               </tbody>
             </Table>
+
+            {/* Final Summary */}
+            <Card className="mt-4 border-success">
+              <Card.Header className="bg-success text-white">
+                <h5 className="mb-0">Final Analysis Summary</h5>
+              </Card.Header>
+              <Card.Body>
+                <Row>
+                  <Col md={6}>
+                    <h6>Average Adjusted Price:</h6>
+                    <h4 className="text-success">{formatCurrency(results.summary.average_adjusted_price)}</h4>
+                  </Col>
+                  <Col md={6}>
+                    <h6>Calculation Method:</h6>
+                    <p className="mb-0">{results.summary.calculation_method || 'Ratterman Method'}</p>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </Card>
           </Card.Body>
         </Card>
       )}
