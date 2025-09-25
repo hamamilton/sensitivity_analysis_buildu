@@ -8,6 +8,7 @@ import LoginPage from './components/LoginPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import SensitivityAnalysisPage from './components/SensitivityAnalysisPage';
 import GLACalculator from './components/GLACalculator';
+import RattermanFullAnalysis from './components/RattermanFullAnalysis';
 
 function App() {
   return (
@@ -31,6 +32,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <GLACalculator />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/ratterman-full" 
+              element={
+                <ProtectedRoute>
+                  <RattermanFullAnalysis />
                 </ProtectedRoute>
               } 
             />

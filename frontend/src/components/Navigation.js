@@ -34,6 +34,9 @@ const Navigation = () => {
               <LinkContainer to="/gla-calculator">
                 <Nav.Link>GLA Calculator</Nav.Link>
               </LinkContainer>
+              <LinkContainer to="/ratterman-full">
+                <Nav.Link>Full Ratterman</Nav.Link>
+              </LinkContainer>
             </Nav>
           )}
           <Nav className="ms-auto">
