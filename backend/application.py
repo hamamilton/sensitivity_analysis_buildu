@@ -3,7 +3,6 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 import xml.etree.ElementTree as ET
 import numpy as np
-from scipy import stats
 from sklearn.linear_model import LinearRegression
 import pandas as pd
 import json
