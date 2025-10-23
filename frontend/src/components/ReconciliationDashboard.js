@@ -13,7 +13,7 @@ const ReconciliationDashboard = ({ comparables }) => {
     if (!pairedSales.compA || !pairedSales.compB) return;
     setPairedSales(prev => ({ ...prev, loading: true }));
     try {
-      const response = await axios.post('http://localhost:8080/api/paired-sales', {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/paired-sales`, {
         comp_a: comparables[pairedSales.compA],
         comp_b: comparables[pairedSales.compB],
       });
@@ -28,7 +28,7 @@ const ReconciliationDashboard = ({ comparables }) => {
     if (!depreciatedCost.cost || !depreciatedCost.rate) return;
     setDepreciatedCost(prev => ({ ...prev, loading: true }));
     try {
-      const response = await axios.post('http://localhost:8080/api/depreciated-cost', {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/depreciated-cost`, {
         replacement_cost_sf: depreciatedCost.cost,
         depreciation_rate: depreciatedCost.rate,
       });
@@ -44,7 +44,7 @@ const ReconciliationDashboard = ({ comparables }) => {
     setMarketRatio(prev => ({ ...prev, loading: true }));
     const avgPriceSf = comparables.reduce((acc, c) => acc + (parseFloat(c.sale_price) / parseFloat(c.gla)), 0) / comparables.length;
     try {
-      const response = await axios.post('http://localhost:8080/api/market-ratio', {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/market-ratio`, {
         avg_price_sf: avgPriceSf,
         contrib_percent: marketRatio.percentage,
       });

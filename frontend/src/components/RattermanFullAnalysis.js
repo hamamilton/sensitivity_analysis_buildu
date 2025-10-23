@@ -137,7 +137,7 @@ const RattermanFullAnalysis = () => {
       adjustment_factors: adjustmentFactors
     };
 
-    const API_URL = 'http://localhost:8080/api/ratterman-full';
+    const API_URL = `${process.env.REACT_APP_API_BASE_URL}/api/ratterman-full`;
     
     axios.post(API_URL, payload, {
       headers: { 'Content-Type': 'application/json' },
@@ -190,7 +190,7 @@ const RattermanFullAnalysis = () => {
         console.log('Ratterman: Processing data, sample:', comparables[0]); // Debug log
         // Try column analysis first
         try {
-          const analysisResponse = await axios.post('http://localhost:8080/api/analyze-columns', {
+          const analysisResponse = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/analyze-columns`, {
             data: comparables
           });
           

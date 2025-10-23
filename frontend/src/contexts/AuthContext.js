@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const loginWithToken = async (token) => {
       try {
-        const response = await fetch('http://localhost:8080/api/auth/token', {
+        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/auth/token`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -44,7 +44,7 @@ const GLACalculator = () => {
   const [columnAnalysis, setColumnAnalysis] = useState(null);
 
   // Get API URL from environment variable
-  const API_URL = 'http://localhost:8080/api/calculate';
+  const API_URL = process.env.REACT_APP_GLA_API_URL;
 
   // Load saved mapping from localStorage on component mount
   useEffect(() => {
@@ -154,7 +154,7 @@ const GLACalculator = () => {
 
     // If not properly formatted, analyze columns for mapping
     try {
-      const response = await axios.post('http://localhost:8080/api/analyze-columns', {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/analyze-columns`, {
         data: importedData
       });
       
