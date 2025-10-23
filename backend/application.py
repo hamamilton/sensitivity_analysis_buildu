@@ -10,9 +10,28 @@ import json
 import re
 from difflib import SequenceMatcher
 
-# Deployment timestamp: 2025-09-24 - CORS policy update
+# Load environment variables
+PORT = int(os.environ.get('PORT', 8080))
+FLASK_ENV = os.environ.get('FLASK_ENV', 'development')
+
+# Deployment timestamp: 2025-10-23 - Production deployment fixes
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+# Configure CORS for production
+if FLASK_ENV == 'production':
+    # Production CORS - allow specific origins
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": [
+                "http://localhost:3000",  # Local development
+                "https://your-frontend-domain.onrender.com",  # Replace with your actual frontend domain
+                "https://*.onrender.com"  # Allow all Render.com subdomains for now
+            ]
+        }
+    })
+else:
+    # Development CORS - allow all origins
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 def detect_outliers(comparables, threshold_std_devs=1.5):
     """
@@ -285,6 +304,20 @@ def smart_normalize_comparable(comp, column_mapping):
                     continue
     
     return normalized
+
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({
+        'status': 'ok', 
+        'message': 'BuildU Property Analysis API',
+        'version': '1.0',
+        'endpoints': [
+            '/api/health',
+            '/api/auth/token', 
+            '/api/sensitivity/calculate',
+            '/api/calculate'
+        ]
+    })
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -1036,8 +1069,10 @@ def market_ratio_analysis():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    # This should only run in development, not in production
     port = int(os.environ.get('PORT', 8080))  # Default to 8080 if PORT is not set
-    app.run(debug=True, port=port)
+    app.run(debug=False, port=port, host='0.0.0.0')
 
+# For WSGI servers like Gunicorn
 application = app
