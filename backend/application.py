@@ -2,12 +2,33 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 import xml.etree.ElementTree as ET
-import numpy as np
-from sklearn.linear_model import LinearRegression
-import pandas as pd
 import json
 import re
 from difflib import SequenceMatcher
+import statistics
+import math
+
+# Simple linear regression function
+def linear_regression(x_values, y_values):
+    """Simple linear regression: y = mx + b"""
+    n = len(x_values)
+    if n < 2:
+        return 0, 0  # slope, intercept
+    
+    sum_x = sum(x_values)
+    sum_y = sum(y_values)
+    sum_xy = sum(x * y for x, y in zip(x_values, y_values))
+    sum_x_squared = sum(x * x for x in x_values)
+    
+    # Calculate slope (m) and intercept (b)
+    denominator = n * sum_x_squared - sum_x * sum_x
+    if denominator == 0:
+        return 0, sum_y / n  # No slope, just average
+    
+    slope = (n * sum_xy - sum_x * sum_y) / denominator
+    intercept = (sum_y - slope * sum_x) / n
+    
+    return slope, intercept
 
 # Load environment variables
 PORT = int(os.environ.get('PORT', 8080))
@@ -65,8 +86,8 @@ def detect_outliers(comparables, threshold_std_devs=1.5):
     price_per_sqft_values = [c['price_per_sqft'] for c in comparables]
     
     # Calculate mean and standard deviation
-    mean_ppsf = np.mean(price_per_sqft_values)
-    std_ppsf = np.std(price_per_sqft_values, ddof=1)  # Sample standard deviation
+    mean_ppsf = statistics.mean(price_per_sqft_values)
+    std_ppsf = statistics.stdev(price_per_sqft_values)  # Sample standard deviation
     
     # Define outlier bounds
     lower_bound = mean_ppsf - (threshold_std_devs * std_ppsf)
@@ -892,31 +913,26 @@ def derive_market_adjustment_factors(comparables):
                 lot_prices = [d[0] for d in lot_data]
                 
                 # Remove outliers (simple method)
-                lot_size_median = np.median(lot_sizes)
-                lot_price_median = np.median(lot_prices)
+                lot_size_median = statistics.median(lot_sizes)
+                lot_price_median = statistics.median(lot_prices)
                 
                 filtered_data = [(p, l) for p, l in lot_data 
-                                if abs(l - lot_size_median) < 3 * np.std(lot_sizes) 
-                                and abs(p - lot_price_median) < 3 * np.std(lot_prices)]
+                                if abs(l - lot_size_median) < 3 * statistics.stdev(lot_sizes) 
+                                and abs(p - lot_price_median) < 3 * statistics.stdev(lot_prices)]
                 
                 if len(filtered_data) >= 3:
                     filtered_lots = [d[1] for d in filtered_data]
                     filtered_prices = [d[0] for d in filtered_data]
                     
-                    X_lot = np.array(filtered_lots).reshape(-1, 1)
-                    y_prices = np.array(filtered_prices)
-                    model = LinearRegression()
-                    model.fit(X_lot, y_prices)
+                    # Use simple linear regression
+                    lot_factor_total, intercept = linear_regression(filtered_lots, filtered_prices)
                     
-                    lot_factor_total = model.coef_[0]  # Total price change per sqft lot
-                    r_squared = model.score(X_lot, y_prices)
+                    print(f"DEBUG: Lot size regression: slope=${lot_factor_total:.2f}")
                     
-                    print(f"DEBUG: Lot size regression: slope=${lot_factor_total:.2f}, R²={r_squared:.3f}")
-                    
-                    if r_squared > 0.05:  # Lower threshold for acceptance
+                    if lot_factor_total != 0:  # Simple acceptance check
                         # Convert to per sqft adjustment (lot size affects total price)
                         factors['lot_size_per_sqft'] = round(lot_factor_total, 2)
-                        print(f"DEBUG: Derived lot size factor: ${lot_factor_total:.2f}/sqft (R²={r_squared:.3f})")
+                        print(f"DEBUG: Derived lot size factor: ${lot_factor_total:.2f}/sqft")
                     else:
                         # Provide conservative default if correlation is too low
                         factors['lot_size_per_sqft'] = 5.0  # Conservative $5/sqft default
@@ -933,23 +949,18 @@ def derive_market_adjustment_factors(comparables):
                 garage_spaces = [d[1] for d in garage_data]
                 garage_prices = [d[0] for d in garage_data]
                 
-                X_garage = np.array(garage_spaces).reshape(-1, 1)
-                y_garage = np.array(garage_prices)
-                model = LinearRegression()
-                model.fit(X_garage, y_garage)
+                # Use simple linear regression
+                garage_factor, intercept = linear_regression(garage_spaces, garage_prices)
                 
-                garage_factor = model.coef_[0]
-                r_squared = model.score(X_garage, y_garage)
+                print(f"DEBUG: Garage regression: slope=${garage_factor:.0f}")
                 
-                print(f"DEBUG: Garage regression: slope=${garage_factor:.0f}, R²={r_squared:.3f}")
-                
-                if r_squared > 0.05:  # Lower threshold
+                if garage_factor != 0:  # Simple acceptance check
                     factors['garage_per_space'] = round(garage_factor, 0)
-                    print(f"DEBUG: Derived garage factor: ${garage_factor:.0f}/space (R²={r_squared:.3f})")
+                    print(f"DEBUG: Derived garage factor: ${garage_factor:.0f}/space")
                 else:
                     # Provide conservative default
                     factors['garage_per_space'] = 10000  # Conservative $10,000/space default
-                    print(f"DEBUG: Using default garage factor: $10,000/space (low correlation)")
+                    print(f"DEBUG: Using default garage factor: $10,000/space (no correlation)")
             except Exception as e:
                 print(f"DEBUG: Could not derive garage factor: {e}")
                 factors['garage_per_space'] = 10000  # Conservative default
@@ -962,23 +973,18 @@ def derive_market_adjustment_factors(comparables):
                 months_old = [d[1] for d in time_data]
                 prices_per_sqft = [d[2] for d in time_data]
                 
-                X_months = np.array(months_old).reshape(-1, 1)
-                y_psf = np.array(prices_per_sqft)
-                model = LinearRegression()
-                model.fit(X_months, y_psf)
+                # Use simple linear regression
+                time_factor_per_sqft, intercept = linear_regression(months_old, prices_per_sqft)
                 
-                time_factor_per_sqft = model.coef_[0]  # Price per sqft change per month
-                r_squared = model.score(X_months, y_psf)
-                
-                print(f"DEBUG: Time regression: slope=${time_factor_per_sqft:.2f}/sqft/month, R²={r_squared:.3f}")
+                print(f"DEBUG: Time regression: slope=${time_factor_per_sqft:.2f}/sqft/month")
                 
                 # Convert to total price adjustment using average GLA
-                avg_gla = np.mean([c['gla'] for c in valid_comparables])
+                avg_gla = statistics.mean([c['gla'] for c in valid_comparables])
                 time_factor_total = time_factor_per_sqft * avg_gla
                 
-                if abs(time_factor_total) > 100 and r_squared > 0.01:  # Must be meaningful amount
+                if abs(time_factor_total) > 100:  # Must be meaningful amount
                     factors['time_adjustment_per_month'] = round(time_factor_total, 0)
-                    print(f"DEBUG: Derived time factor: ${time_factor_total:.0f}/month (R²={r_squared:.3f})")
+                    print(f"DEBUG: Derived time factor: ${time_factor_total:.0f}/month")
                 else:
                     # Conservative default for time adjustment
                     factors['time_adjustment_per_month'] = 500  # Conservative $500/month
