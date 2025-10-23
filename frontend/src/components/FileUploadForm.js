@@ -61,6 +61,14 @@ const FileUploadForm = ({ userEmail, onFileUpload }) => {
     }
   };
 
+  const handleReset = () => {
+    setFile(null);
+    setError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="container mt-5">
       {/* Header with Buildu Logo */}
@@ -120,12 +128,20 @@ const FileUploadForm = ({ userEmail, onFileUpload }) => {
             )}
 
             {file && (
-              <button 
-                className="btn btn-success mt-3"
-                onClick={handleSubmit}
-              >
-                Continue to Analysis
-              </button>
+              <div className="d-flex gap-2 mt-3 justify-content-center">
+                <button 
+                  className="btn btn-outline-secondary"
+                  onClick={handleReset}
+                >
+                  Reset
+                </button>
+                <button 
+                  className="btn btn-success"
+                  onClick={handleSubmit}
+                >
+                  Continue to Analysis
+                </button>
+              </div>
             )}
           </div>
           <div className="text-center mt-3">

@@ -1,0 +1,712 @@
+/* BuildU.io Color Scheme - Direct Implementation */
+
+/* CSS Variables for BuildU Colors */
+:root {
+  --buildu-primary: #1a365d;
+  --buildu-primary-dark: #153e75;
+  --buildu-primary-light: #2d3748;
+  --buildu-secondary: #4a5568;
+  --buildu-secondary-light: #718096;
+  --buildu-accent: #ed8936;
+  --buildu-accent-light: #f6ad55;
+  --buildu-accent-dark: #c05621;
+  --buildu-bg-primary: #ffffff;
+  --buildu-bg-secondary: #f7fafc;
+  --buildu-bg-tertiary: #edf2f7;
+  --buildu-text-primary: #1a202c;
+  --buildu-text-secondary: #4a5568;
+  --buildu-border: #e2e8f0;
+}
+
+/* Dark Mode Variables */
+:root.dark-theme {
+  --buildu-primary: #2d3748;
+  --buildu-primary-dark: #1a202c;
+  --buildu-primary-light: #4a5568;
+  --buildu-secondary: #718096;
+  --buildu-secondary-light: #a0aec0;
+  --buildu-accent: #f6ad55;
+  --buildu-accent-light: #fbb040;
+  --buildu-accent-dark: #ed8936;
+  --buildu-bg-primary: #1a202c;
+  --buildu-bg-secondary: #2d3748;
+  --buildu-bg-tertiary: #4a5568;
+  --buildu-text-primary: #ffffff;
+  --buildu-text-secondary: #e2e8f0;
+  --buildu-border: #4a5568;
+}
+
+/* Light Mode Variables (explicit) */
+:root.light-theme {
+  --buildu-primary: #1a365d;
+  --buildu-primary-dark: #153e75;
+  --buildu-primary-light: #2d3748;
+  --buildu-secondary: #4a5568;
+  --buildu-secondary-light: #718096;
+  --buildu-accent: #ed8936;
+  --buildu-accent-light: #f6ad55;
+  --buildu-accent-dark: #c05621;
+  --buildu-bg-primary: #ffffff;
+  --buildu-bg-secondary: #f7fafc;
+  --buildu-bg-tertiary: #edf2f7;
+  --buildu-text-primary: #1a202c;
+  --buildu-text-secondary: #4a5568;
+  --buildu-border: #e2e8f0;
+}
+
+/* Global body styling */
+body {
+  background-color: var(--buildu-bg-secondary) !important;
+  color: var(--buildu-text-primary) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', Cantarell, sans-serif !important;
+  transition: background-color 0.3s ease, color 0.3s ease !important;
+}
+
+/* Make sure the App container uses the theme */
+#root, .App {
+  background-color: var(--buildu-bg-secondary) !important;
+  min-height: 100vh !important;
+  transition: background-color 0.3s ease !important;
+}
+
+/* Dark mode specific adjustments */
+.dark-theme {
+  color-scheme: dark;
+}
+
+.light-theme {
+  color-scheme: light;
+}
+
+/* Dark mode text improvements for better contrast */
+.dark-theme body {
+  color: #ffffff !important;
+}
+
+.dark-theme .text-muted {
+  color: #cbd5e0 !important;
+}
+
+.dark-theme p,
+.dark-theme span,
+.dark-theme div {
+  color: #ffffff !important;
+}
+
+.dark-theme .text-secondary {
+  color: #e2e8f0 !important;
+}
+
+.dark-theme .card-text {
+  color: #ffffff !important;
+}
+
+.dark-theme .lead {
+  color: #e2e8f0 !important;
+}
+
+/* Ensure headings have good contrast in dark mode */
+.dark-theme h1,
+.dark-theme h2,
+.dark-theme h3,
+.dark-theme h4,
+.dark-theme h5,
+.dark-theme h6 {
+  color: #ffffff !important;
+}
+
+/* Dark mode utility text classes */
+.dark-theme .text-buildu-primary {
+  color: #90cdf4 !important;
+}
+
+.dark-theme .text-buildu-secondary {
+  color: #cbd5e0 !important;
+}
+
+.dark-theme .text-buildu-accent {
+  color: #fbb040 !important;
+}
+
+/* Smooth transitions for theme changes */
+*, *::before, *::after {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* Override Bootstrap primary buttons */
+.btn-primary {
+  background-color: var(--buildu-primary) !important;
+  border-color: var(--buildu-primary) !important;
+  color: white !important;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+  background-color: var(--buildu-primary-dark) !important;
+  border-color: var(--buildu-primary-dark) !important;
+  color: white !important;
+}
+
+/* Custom accent button */
+.btn-accent {
+  background-color: var(--buildu-accent) !important;
+  border-color: var(--buildu-accent) !important;
+  color: white !important;
+}
+
+.btn-accent:hover, .btn-accent:focus, .btn-accent:active {
+  background-color: var(--buildu-accent-dark) !important;
+  border-color: var(--buildu-accent-dark) !important;
+  color: white !important;
+}
+
+/* Update warning buttons to use accent color */
+.btn-warning {
+  background-color: var(--buildu-accent) !important;
+  border-color: var(--buildu-accent) !important;
+  color: white !important;
+}
+
+.btn-warning:hover, .btn-warning:focus, .btn-warning:active {
+  background-color: var(--buildu-accent-dark) !important;
+  border-color: var(--buildu-accent-dark) !important;
+  color: white !important;
+}
+
+/* Navigation bar styling */
+.navbar {
+  background-color: var(--buildu-primary) !important;
+  border-bottom: 2px solid var(--buildu-accent) !important;
+}
+
+.navbar-brand {
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.navbar-brand:hover, .navbar-brand:focus {
+  color: var(--buildu-accent-light) !important;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.9) !important;
+  transition: color 0.2s ease !important;
+}
+
+.nav-link:hover, .nav-link:focus {
+  color: var(--buildu-accent-light) !important;
+}
+
+/* Ensure all text in navbar is white */
+.navbar * {
+  color: white !important;
+}
+
+.navbar .nav-link {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.navbar .nav-link:hover {
+  color: var(--buildu-accent-light) !important;
+}
+
+/* Card styling */
+.card {
+  background-color: var(--buildu-bg-primary) !important;
+  border: 1px solid var(--buildu-border) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+}
+
+/* Dark mode card shadows */
+.dark-theme .card {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark-theme .card-body {
+  color: #ffffff !important;
+}
+
+.dark-theme .card-title {
+  color: #ffffff !important;
+}
+
+.dark-theme .card-text {
+  color: #e2e8f0 !important;
+}
+
+/* Dark mode list styling */
+.dark-theme ul li,
+.dark-theme ol li {
+  color: #e2e8f0 !important;
+}
+
+.dark-theme .list-unstyled li {
+  color: #e2e8f0 !important;
+}
+
+/* Dark mode button text */
+.dark-theme .btn {
+  font-weight: 500 !important;
+}
+
+/* Dark mode small text elements */
+.dark-theme small,
+.dark-theme .small {
+  color: #cbd5e0 !important;
+}
+
+/* Dark mode badge styling */
+.dark-theme .badge {
+  color: #ffffff !important;
+}
+
+/* Dark mode navigation improvements */
+.dark-theme .nav-link {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.dark-theme .navbar-text {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.card-header {
+  background-color: var(--buildu-bg-tertiary) !important;
+  border-bottom: 1px solid var(--buildu-border) !important;
+  font-weight: 600 !important;
+  color: var(--buildu-text-primary) !important;
+}
+
+/* Dark card headers with primary background */
+.card-header.bg-primary,
+.card-header.bg-info,
+.bg-primary .card-header,
+.bg-info .card-header {
+  background-color: var(--buildu-primary) !important;
+  color: white !important;
+}
+
+/* Ensure any h1, h2, h3, h4, h5, h6 in dark backgrounds are white */
+.bg-primary h1, .bg-primary h2, .bg-primary h3, .bg-primary h4, .bg-primary h5, .bg-primary h6,
+.bg-info h1, .bg-info h2, .bg-info h3, .bg-info h4, .bg-info h5, .bg-info h6,
+.results-header h1, .results-header h2, .results-header h3, .results-header h4, .results-header h5, .results-header h6,
+.summary-card h1, .summary-card h2, .summary-card h3, .summary-card h4, .summary-card h5, .summary-card h6 {
+  color: white !important;
+}
+
+/* Summary cards with gradient background */
+.summary-card {
+  background: linear-gradient(135deg, var(--buildu-primary) 0%, var(--buildu-primary-light) 100%) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.summary-card .card-title {
+  color: var(--buildu-accent-light) !important;
+}
+
+.summary-card .card-text {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Results header styling */
+.results-header {
+  background: linear-gradient(90deg, var(--buildu-accent) 0%, var(--buildu-accent-light) 100%) !important;
+  color: white !important;
+  padding: 1rem !important;
+  border-radius: 8px 8px 0 0 !important;
+  font-weight: 600 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Ensure all text in results header is white */
+.results-header * {
+  color: white !important;
+}
+
+/* Ensure all text in dark backgrounds is white */
+.bg-primary *, .bg-info *, .summary-card *, .results-header * {
+  color: white !important;
+}
+
+/* Override any Bootstrap text colors in dark areas */
+.bg-primary .text-dark, .bg-info .text-dark, .summary-card .text-dark, .results-header .text-dark {
+  color: white !important;
+}
+
+/* Form controls */
+.form-control {
+  border: 1px solid var(--buildu-border) !important;
+  border-radius: 6px !important;
+  background-color: var(--buildu-bg-primary) !important;
+  color: var(--buildu-text-primary) !important;
+}
+
+.form-control:focus {
+  border-color: var(--buildu-accent) !important;
+  box-shadow: 0 0 0 0.2rem rgba(237, 137, 54, 0.25) !important;
+  background-color: var(--buildu-bg-primary) !important;
+  color: var(--buildu-text-primary) !important;
+}
+
+.form-label {
+  color: var(--buildu-text-secondary) !important;
+  font-weight: 500 !important;
+}
+
+/* Table styling */
+.table {
+  background-color: var(--buildu-bg-primary) !important;
+  color: var(--buildu-text-primary) !important;
+}
+
+.table th {
+  background-color: var(--buildu-bg-tertiary) !important;
+  color: var(--buildu-text-primary) !important;
+  font-weight: 600 !important;
+  border-color: var(--buildu-border) !important;
+}
+
+.table td {
+  border-color: var(--buildu-border) !important;
+  color: var(--buildu-text-primary) !important;
+}
+
+/* Dark mode table adjustments */
+.dark-theme .table-striped > tbody > tr:nth-of-type(odd) > td,
+.dark-theme .table-striped > tbody > tr:nth-of-type(odd) > th {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark-theme .table td,
+.dark-theme .table th {
+  color: #ffffff !important;
+}
+
+.dark-theme .table thead th {
+  color: #ffffff !important;
+  background-color: #4a5568 !important;
+}
+
+/* Dark mode form improvements */
+.dark-theme .form-label {
+  color: #e2e8f0 !important;
+  font-weight: 600 !important;
+}
+
+.dark-theme .form-control {
+  background-color: #2d3748 !important;
+  border-color: #4a5568 !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .form-control:focus {
+  background-color: #2d3748 !important;
+  border-color: #f6ad55 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 0.2rem rgba(246, 173, 85, 0.25) !important;
+}
+
+.dark-theme .form-control::placeholder {
+  color: #a0aec0 !important;
+}
+
+/* Dark mode alert improvements */
+.dark-theme .alert {
+  color: #ffffff !important;
+}
+
+.dark-theme .alert-primary {
+  background-color: rgba(144, 205, 244, 0.15) !important;
+  border-color: #90cdf4 !important;
+  color: #90cdf4 !important;
+}
+
+.dark-theme .alert-success {
+  background-color: rgba(104, 211, 145, 0.15) !important;
+  border-color: #68d391 !important;
+  color: #68d391 !important;
+}
+
+.dark-theme .alert-warning {
+  background-color: rgba(246, 173, 85, 0.15) !important;
+  border-color: #f6ad55 !important;
+  color: #f6ad55 !important;
+}
+
+.dark-theme .alert-danger {
+  background-color: rgba(252, 129, 129, 0.15) !important;
+  border-color: #fc8181 !important;
+  color: #fc8181 !important;
+}
+
+/* Alert styling */
+.alert-success {
+  background-color: rgba(56, 161, 105, 0.1) !important;
+  border-color: #38a169 !important;
+  color: #38a169 !important;
+}
+
+.alert-primary {
+  background-color: rgba(26, 54, 93, 0.1) !important;
+  border-color: var(--buildu-primary) !important;
+  color: var(--buildu-primary) !important;
+}
+
+.alert-warning {
+  background-color: rgba(237, 137, 54, 0.1) !important;
+  border-color: var(--buildu-accent) !important;
+  color: var(--buildu-accent-dark) !important;
+}
+
+.alert-danger {
+  background-color: rgba(229, 62, 62, 0.1) !important;
+  border-color: #e53e3e !important;
+  color: #e53e3e !important;
+}
+
+/* Progress bar styling */
+.progress {
+  background-color: var(--buildu-bg-tertiary) !important;
+}
+
+.progress-bar {
+  background-color: var(--buildu-accent) !important;
+}
+
+/* Modal styling */
+.modal-content {
+  background-color: var(--buildu-bg-primary) !important;
+  border: 1px solid var(--buildu-border) !important;
+  color: var(--buildu-text-primary) !important;
+}
+
+.modal-header {
+  background-color: var(--buildu-bg-tertiary) !important;
+  border-bottom: 1px solid var(--buildu-border) !important;
+}
+
+.modal-title {
+  color: var(--buildu-text-primary) !important;
+}
+
+/* Dropdown styling for dark mode */
+.dropdown-menu {
+  background-color: var(--buildu-bg-primary) !important;
+  border: 1px solid var(--buildu-border) !important;
+  color: var(--buildu-text-primary) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.dropdown-item {
+  color: var(--buildu-text-primary) !important;
+  font-weight: 500 !important;
+  padding: 0.75rem 1rem !important;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+  background-color: var(--buildu-bg-tertiary) !important;
+  color: var(--buildu-text-primary) !important;
+}
+
+.dropdown-item.active {
+  background-color: var(--buildu-accent) !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+/* Dark mode dropdown adjustments */
+.dark-theme .dropdown-menu {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Light mode specific dropdown styling for better contrast */
+.light-theme .dropdown-item {
+  color: #1a202c !important;
+}
+
+.light-theme .dropdown-item:hover, 
+.light-theme .dropdown-item:focus {
+  background-color: #edf2f7 !important;
+  color: #1a202c !important;
+}
+
+/* Theme toggle button styling */
+.dropdown-toggle {
+  border: none !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500 !important;
+}
+
+.dropdown-toggle:hover, .dropdown-toggle:focus {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.dropdown-toggle::after {
+  border-top: 0.3em solid rgba(255, 255, 255, 0.8) !important;
+  border-right: 0.25em solid transparent !important;
+  border-bottom: 0 !important;
+  border-left: 0.25em solid transparent !important;
+}
+
+/* Ensure dropdown items have good contrast */
+.dropdown-item span {
+  color: inherit !important;
+}
+
+/* Override Bootstrap's muted text in dropdown */
+.dropdown-menu .text-muted {
+  color: var(--buildu-text-secondary) !important;
+}
+
+/* Light mode - ensure dark text for readability */
+.light-theme .dropdown-menu {
+  background-color: white !important;
+  border: 1px solid #dee2e6 !important;
+}
+
+.light-theme .dropdown-item {
+  color: #212529 !important;
+}
+
+.light-theme .dropdown-item:hover,
+.light-theme .dropdown-item:focus {
+  background-color: #f8f9fa !important;
+  color: #212529 !important;
+}
+
+/* Dark mode - ensure light text for readability */
+.dark-theme .dropdown-menu {
+  background-color: #2d3748 !important;
+  border: 1px solid #4a5568 !important;
+}
+
+.dark-theme .dropdown-item {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+.dark-theme .dropdown-item:hover,
+.dark-theme .dropdown-item:focus {
+  background-color: #4a5568 !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .dropdown-item.active {
+  background-color: #f6ad55 !important;
+  color: #1a202c !important;
+  font-weight: 600 !important;
+}
+
+/* Utility classes */
+.text-buildu-primary {
+  color: var(--buildu-primary) !important;
+}
+
+.text-buildu-secondary {
+  color: var(--buildu-secondary) !important;
+}
+
+.text-buildu-accent {
+  color: var(--buildu-accent) !important;
+}
+
+.bg-buildu-primary {
+  background-color: var(--buildu-primary) !important;
+}
+
+.bg-buildu-accent {
+  background-color: var(--buildu-accent) !important;
+}
+
+.border-buildu-accent {
+  border-color: var(--buildu-accent) !important;
+}
+
+/* Container styling */
+.container {
+  background-color: transparent !important;
+}
+
+/* Special card variations */
+.card.border-accent {
+  border-color: var(--buildu-accent) !important;
+  border-width: 2px !important;
+}
+
+.card.text-center:not(.summary-card) .card-title {
+  color: var(--buildu-accent) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card {
+    margin-bottom: 1rem !important;
+  }
+  
+  .results-header {
+    padding: 0.75rem !important;
+    font-size: 1.1rem !important;
+  }
+}
+
+/* Override any remaining Bootstrap primary colors */
+.text-primary {
+  color: var(--buildu-primary) !important;
+}
+
+.bg-primary {
+  background-color: var(--buildu-primary) !important;
+}
+
+.border-primary {
+  border-color: var(--buildu-primary) !important;
+}
+
+/* Override Bootstrap info color to use our primary */
+.bg-info {
+  background-color: var(--buildu-primary) !important;
+  color: white !important;
+}
+
+.text-info {
+  color: var(--buildu-primary) !important;
+}
+
+.border-info {
+  border-color: var(--buildu-primary) !important;
+}
+
+.btn-info {
+  background-color: var(--buildu-primary) !important;
+  border-color: var(--buildu-primary) !important;
+  color: white !important;
+}
+
+.btn-info:hover, .btn-info:focus, .btn-info:active {
+  background-color: var(--buildu-primary-dark) !important;
+  border-color: var(--buildu-primary-dark) !important;
+  color: white !important;
+}
+
+/* Force white text on any info backgrounds */
+.bg-info, .bg-info * {
+  color: white !important;
+}
+
+/* Force white text on primary backgrounds */
+.bg-primary, .bg-primary * {
+  color: white !important;
+}
+
+/* Link colors */
+a {
+  color: var(--buildu-accent) !important;
+}
+
+a:hover {
+  color: var(--buildu-accent-dark) !important;
+}

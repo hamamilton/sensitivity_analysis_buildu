@@ -24,7 +24,7 @@ ChartJS.register(
   Legend
 );
 
-const SensitivityCalculator = ({ userEmail, initialFile }) => {
+const SensitivityCalculator = ({ userEmail, initialFile, onReset }) => {
   const [subjectProperty, setSubjectProperty] = useState(null);
   const [comparables, setComparables] = useState([]);
   const [error, setError] = useState(null);
@@ -50,7 +50,7 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
 
         const response = await axios({
           method: 'post',
-          url: process.env.REACT_APP_API_URL || 'https://sensitivity-analysis-backend.onrender.com/api/sensitivity/calculate',
+          url: 'http://localhost:8080/api/sensitivity/calculate',
           data: formData,
           headers: {
             'Content-Type': 'multipart/form-data'
@@ -615,6 +615,19 @@ const SensitivityCalculator = ({ userEmail, initialFile }) => {
                       </tbody>
                     </table>
                   </div>
+                </div>
+              )}
+              
+              {/* Start Over Button */}
+              {onReset && (
+                <div className="text-center mt-4">
+                  <button 
+                    className="btn btn-outline-primary btn-lg"
+                    onClick={onReset}
+                  >
+                    <i className="fas fa-arrow-left me-2"></i>
+                    Start Over
+                  </button>
                 </div>
               )}
             </div>

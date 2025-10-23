@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import FileImporter from './FileImporter';
+import ColumnMappingModal from './ColumnMappingModal';
 import { Container, Card, Table, Button, Form, Alert, Row, Col } from 'react-bootstrap';
 
-// Formatting utility functions
+// Formatting utilities
 const formatCurrency = (amount, decimals = 0) => {
   try {
     return new Intl.NumberFormat('en-US', {
@@ -38,9 +39,12 @@ const GLACalculator = () => {
   const [loading, setLoading] = useState(false);
   const [savedMapping, setSavedMapping] = useState(null);
   const [editingField, setEditingField] = useState(null);
+  const [showColumnMapping, setShowColumnMapping] = useState(false);
+  const [pendingFileData, setPendingFileData] = useState(null);
+  const [columnAnalysis, setColumnAnalysis] = useState(null);
 
   // Get API URL from environment variable
-  const API_URL = process.env.REACT_APP_GLA_API_URL || 'https://sensitivity-analysis-backend.onrender.com/api/calculate';
+  const API_URL = 'http://localhost:8080/api/calculate';
 
   // Load saved mapping from localStorage on component mount
   useEffect(() => {
@@ -53,6 +57,60 @@ const GLACalculator = () => {
       }
     }
   }, []);
+
+  // Helper function to apply column mappings to raw data
+  const applyColumnMappings = (rawData, mappings) => {
+    console.log('Applying mappings:', mappings); // Debug log
+    console.log('Raw data sample:', rawData[0]); // Debug log
+    
+    return rawData.map(row => {
+      const mappedRow = {};
+      
+      // Map the columns according to the user's selections
+      Object.keys(mappings).forEach(targetField => {
+        const sourceColumn = mappings[targetField];
+        if (sourceColumn && row[sourceColumn] !== undefined) {
+          mappedRow[targetField] = row[sourceColumn];
+        }
+      });
+      
+      console.log('Original row:', row); // Debug log
+      console.log('Mapped row:', mappedRow); // Debug log
+      return mappedRow;
+    });
+  };
+
+  // Handle confirmed column mapping from modal
+  const handleColumnMappingConfirmed = (selectedMappings) => {
+    if (pendingFileData) {
+      console.log('Selected mappings:', selectedMappings); // Debug log
+      const mappedData = applyColumnMappings(pendingFileData, selectedMappings);
+      console.log('Mapped data sample:', mappedData[0]); // Debug log
+      
+      // Convert to GLA Calculator expected format (keep sale_price field name for table compatibility)
+      const convertedData = mappedData.map(item => ({
+        sale_price: parseFloat(item.sale_price || item.price || 0),  // Keep as sale_price for table
+        gla: parseFloat(item.gla || 0),  // Convert to number
+        address: item.address || 'N/A'
+      }));
+      
+      console.log('Converted data sample:', convertedData[0]); // Debug log
+      setComparables(convertedData);
+      setResults(null);
+      setError('');
+      
+      // Clear pending state
+      setPendingFileData(null);
+      setColumnAnalysis(null);
+    }
+  };
+
+  // Handle column mapping modal close
+  const handleColumnMappingClose = () => {
+    setShowColumnMapping(false);
+    setPendingFileData(null);
+    setColumnAnalysis(null);
+  };
 
   // Helper function to get display value (formatted or raw based on editing state)
   const getDisplayValue = (value, field, index) => {
@@ -81,10 +139,70 @@ const GLACalculator = () => {
     setEditingField(null);
   };
 
-  const handleDataImported = (importedData) => {
-    setComparables(importedData);
-    setResults(null); // Clear previous results
-    setError('');
+  const handleDataImported = async (importedData) => {
+    // First try to use the data directly if it looks properly formatted
+    const firstItem = importedData[0] || {};
+    const hasRequiredFields = firstItem.price && firstItem.gla;
+    
+    if (hasRequiredFields) {
+      // Data is already properly formatted
+      setComparables(importedData);
+      setResults(null);
+      setError('');
+      return;
+    }
+
+    // If not properly formatted, analyze columns for mapping
+    try {
+      const response = await axios.post('http://localhost:8080/api/analyze-columns', {
+        data: importedData
+      });
+      
+      const analysis = response.data;
+      
+      // Check if we have high-confidence mappings for all required fields
+      const requiredFields = ['sale_price', 'gla', 'address'];  // Use sale_price instead of price
+      const hasHighConfidenceMappings = requiredFields.every(field => 
+        analysis.potential_mappings[field]?.confidence > 0.8
+      );
+      
+      if (hasHighConfidenceMappings) {
+        // Auto-apply high confidence mappings
+        const autoMappings = {};
+        requiredFields.forEach(field => {
+          const mappingData = analysis.potential_mappings[field];
+          if (mappingData?.best_match) {
+            autoMappings[field] = mappingData.best_match;
+          }
+        });
+        
+        // Convert to GLA Calculator expected format (keep sale_price field name for table compatibility)
+        const mappedData = applyColumnMappings(importedData, autoMappings).map(item => {
+          console.log('Mapping item:', item); // Debug log
+          const price = parseFloat(item.sale_price || item.price || 0);
+          const gla = parseFloat(item.gla || 0);
+          const converted = {
+            sale_price: price,  // Keep as sale_price for table compatibility
+            gla: gla,
+            address: item.address || 'N/A'
+          };
+          console.log('Converted item:', converted); // Debug log
+          return converted;
+        });
+        console.log('Final mapped data:', mappedData); // Debug log
+        setComparables(mappedData);
+        setResults(null);
+        setError('');
+      } else {
+        // Show column mapping modal for user selection
+        setPendingFileData(importedData);
+        setColumnAnalysis(analysis);
+        setShowColumnMapping(true);
+      }
+    } catch (error) {
+      console.error('Column analysis failed:', error);
+      setError('Failed to analyze file columns. Please ensure your file contains price, GLA, and address data.');
+    }
   };
 
   const handleMappingUpdate = (mapping) => {
@@ -105,6 +223,20 @@ const GLACalculator = () => {
 
   const removeRow = (idx) => {
     setComparables(comparables.filter((_, i) => i !== idx));
+  };
+
+  const handleReset = () => {
+    setSubjectGLA('');
+    setComparables([
+      { address: '', sale_price: '', gla: '' },
+      { address: '', sale_price: '', gla: '' },
+      { address: '', sale_price: '', gla: '' }
+    ]);
+    setResults(null);
+    setError(null);
+    setLoading(false);
+    setSavedMapping(null);
+    setEditingField(null);
   };
 
   const handleSubmit = async (e) => {
@@ -154,13 +286,13 @@ const GLACalculator = () => {
   return (
     <Container className="mt-4">
       <div className="text-center mb-4">
-        <h1>GLA Adjustment Tool</h1>
-        <p className="text-muted">Ratterman Method Calculator for Property Appraisers</p>
+        <h1 className="text-buildu-primary"><strong>BuildU</strong> GLA Adjustment Tool</h1>
+        <p className="text-buildu-secondary">Ratterman Method Calculator for Property Appraisers</p>
       </div>
       
       {/* File Import Section */}
-      <Card className="mb-4 border-info">
-        <Card.Header className="bg-info text-white">
+      <Card className="mb-4 border-accent">
+        <Card.Header className="results-header">
           <h3 className="mb-0">Import Data from File</h3>
         </Card.Header>
         <Card.Body>
@@ -282,6 +414,9 @@ const GLACalculator = () => {
               <Button variant="secondary" type="button" onClick={addRow}>
                 Add Comparable
               </Button>
+              <Button variant="outline-secondary" type="button" onClick={handleReset}>
+                Reset
+              </Button>
               <Button variant="primary" type="submit" disabled={loading}>
                 {loading ? 'Calculating...' : 'Calculate GLA Adjustments'}
               </Button>
@@ -305,43 +440,43 @@ const GLACalculator = () => {
             {/* Summary Cards */}
             <Row className="mb-4">
               <Col md={3}>
-                <Card className="text-center">
+                <Card className="summary-card">
                   <Card.Body>
                     <Card.Title>Subject Property GLA</Card.Title>
-                    <h4 className="text-primary">
+                    <h4 className="text-buildu-accent">
                       {results.subject_gla ? formatNumber(results.subject_gla) + ' sq ft' : 'Optional'}
                     </h4>
                   </Card.Body>
                 </Card>
               </Col>
               <Col md={3}>
-                <Card className="text-center">
+                <Card className="text-center border-accent">
                   <Card.Body>
                     <Card.Title>Number of Comparables</Card.Title>
-                    <h4 className="text-info">{formatNumber(results.summary.number_of_comparables)}</h4>
+                    <h4 className="text-buildu-primary">{formatNumber(results.summary.number_of_comparables)}</h4>
                   </Card.Body>
                 </Card>
               </Col>
               <Col md={3}>
-                <Card className="text-center">
+                <Card className="text-center border-accent">
                   <Card.Body>
                     <Card.Title>Average GLA</Card.Title>
-                    <h4 className="text-warning">{formatNumber(results.summary.average_gla)} sq ft</h4>
+                    <h4 className="text-buildu-accent">{formatNumber(results.summary.average_gla)} sq ft</h4>
                   </Card.Body>
                 </Card>
               </Col>
               <Col md={3}>
-                <Card className="text-center">
+                <Card className="text-center border-accent">
                   <Card.Body>
                     <Card.Title>Market Avg $/Sq Ft</Card.Title>
-                    <h4 className="text-success">${formatNumber(results.summary.average_price_per_sqft, 2)}</h4>
+                    <h4 className="text-buildu-secondary">${formatNumber(results.summary.average_price_per_sqft, 2)}</h4>
                   </Card.Body>
                 </Card>
               </Col>
             </Row>
 
             {/* Calculation Method */}
-            <Alert variant="info" className="mb-4">
+            <Alert variant="primary" className="mb-4">
               <strong>Ratterman Method:</strong> Each comparable is adjusted to the market average price per square foot.
               <br />
               <small className="text-muted">
@@ -467,6 +602,73 @@ const GLACalculator = () => {
               </tbody>
             </Table>
 
+            {/* Outlier Information Section */}
+            {results.outliers && results.outliers.length > 0 && (
+              <Card className="mt-4 border-warning">
+                <Card.Header className="bg-warning text-dark">
+                  <h5 className="mb-0">
+                    <i className="fas fa-exclamation-triangle me-2"></i>
+                    Outliers Removed ({results.outliers.length})
+                  </h5>
+                </Card.Header>
+                <Card.Body>
+                  <p className="text-muted mb-3">
+                    The following comparables were identified as outliers and excluded from the analysis 
+                    (price per sqft outside {results.outlier_analysis?.threshold_std_devs || 1.5} standard deviations):
+                  </p>
+                  <div className="table-responsive">
+                    <Table size="sm" className="mb-0">
+                      <thead className="table-light">
+                        <tr>
+                          <th>Comparable</th>
+                          <th>Address</th>
+                          <th>Price</th>
+                          <th>GLA</th>
+                          <th>Price/SqFt</th>
+                          <th>Reason</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {results.outliers.map((outlier, idx) => (
+                          <tr key={idx}>
+                            <td>#{outlier.comparable_number}</td>
+                            <td>{outlier.address}</td>
+                            <td>{formatCurrency(outlier.original_price)}</td>
+                            <td>{outlier.original_gla?.toLocaleString()}</td>
+                            <td>
+                              <span className={outlier.outlier_type === 'above_threshold' ? 'text-danger' : 'text-primary'}>
+                                {formatCurrency(outlier.price_per_sqft)}
+                              </span>
+                            </td>
+                            <td className="small text-muted">{outlier.outlier_reason}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
+                  {results.outlier_analysis && (
+                    <div className="mt-3 p-2 bg-light rounded">
+                      <small className="text-muted">
+                        <strong>Statistical Summary:</strong> Mean price/sqft: {formatCurrency(results.outlier_analysis.mean_price_per_sqft)} | 
+                        Standard Deviation: {formatCurrency(results.outlier_analysis.std_dev_price_per_sqft)} | 
+                        Valid Range: {formatCurrency(results.outlier_analysis.lower_bound)} - {formatCurrency(results.outlier_analysis.upper_bound)}
+                      </small>
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+            )}
+
+            {/* Display when no outliers were found */}
+            {results.outlier_analysis && results.outliers && results.outliers.length === 0 && (
+              <div className="mt-3 text-center">
+                <small className="text-success">
+                  <i className="fas fa-check-circle me-1"></i>
+                  No outliers detected - all comparables within {results.outlier_analysis.threshold_std_devs} standard deviations
+                </small>
+              </div>
+            )}
+
             {/* Final Summary */}
             <Card className="mt-4 border-success">
               <Card.Header className="bg-success text-white">
@@ -488,6 +690,15 @@ const GLACalculator = () => {
           </Card.Body>
         </Card>
       )}
+
+      {/* Column Mapping Modal */}
+      <ColumnMappingModal
+        isOpen={showColumnMapping}
+        onClose={handleColumnMappingClose}
+        columnAnalysis={columnAnalysis}
+        onConfirmMapping={handleColumnMappingConfirmed}
+        analysisType="gla"
+      />
     </Container>
   );
 };

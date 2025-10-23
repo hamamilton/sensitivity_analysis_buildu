@@ -15,6 +15,11 @@ const EmailCaptureForm = ({ onEmailSubmit, initialEmail = 'demo@windsurf.ai' }) 
     }
   };
 
+  const handleReset = () => {
+    setEmail(initialEmail);
+    setError('');
+  };
+
   return (
     <div style={{
       display: 'flex',
@@ -44,16 +49,28 @@ const EmailCaptureForm = ({ onEmailSubmit, initialEmail = 'demo@windsurf.ai' }) 
           }}
         />
         {error && <p style={{ color: 'red', fontSize: '0.9em' }}>{error}</p>}
-        <button type="submit" style={{
-          padding: '10px 20px',
-          backgroundColor: '#007bff',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer'
-        }}>
-          Continue
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button type="submit" style={{
+            padding: '10px 20px',
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}>
+            Continue
+          </button>
+          <button type="button" onClick={handleReset} style={{
+            padding: '10px 20px',
+            backgroundColor: '#6c757d',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}>
+            Reset
+          </button>
+        </div>
       </form>
     </div>
   );

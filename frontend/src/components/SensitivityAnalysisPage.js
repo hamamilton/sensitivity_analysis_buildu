@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import Header from './Header';
 import SensitivityCalculator from './SensitivityCalculator';
 import FileUploadForm from './FileUploadForm';
+import { Container } from 'react-bootstrap';
 
 const SensitivityAnalysisPage = () => {
   const [step, setStep] = useState('fileUpload');
@@ -19,10 +19,6 @@ const SensitivityAnalysisPage = () => {
     setStep('fileUpload');
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   const renderCurrentStep = () => {
     switch (step) {
       case 'fileUpload':
@@ -37,6 +33,7 @@ const SensitivityAnalysisPage = () => {
           <SensitivityCalculator 
             userEmail={user?.email} 
             initialFile={uploadedFile}
+            onReset={handleReset}
           />
         );
       default:
@@ -50,14 +47,13 @@ const SensitivityAnalysisPage = () => {
   };
 
   return (
-    <div>
-      <Header 
-        onReset={handleReset}
-        onPrint={handlePrint}
-        showButtons={step === 'calculator'}
-      />
+    <Container className="mt-4">
+      <div className="text-center mb-4">
+        <h1 className="text-buildu-primary"><strong>BuildU</strong> Sensitivity Analysis</h1>
+        <p className="text-buildu-secondary">Property Valuation Analysis Tool</p>
+      </div>
       {renderCurrentStep()}
-    </div>
+    </Container>
   );
 };
 

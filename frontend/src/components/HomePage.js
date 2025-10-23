@@ -11,12 +11,14 @@ const HomePage = () => {
     return (
       <Container className="mt-5">
         <div className="text-center mb-5">
-          <h1 className="display-4">Property Analysis Tools</h1>
-          <p className="lead text-muted">
+          <h1 className="display-4 text-buildu-primary">
+            <strong>BuildU</strong> Property Analysis Tools
+          </h1>
+          <p className="lead text-buildu-secondary">
             Professional tools for property appraisers and real estate professionals
           </p>
           <Button 
-            variant="info" 
+            variant="primary" 
             size="lg" 
             onClick={() => navigate('/login')}
             className="mt-3"
@@ -27,16 +29,16 @@ const HomePage = () => {
 
         <Row className="justify-content-center">
           <Col md={10}>
-            <Card className="border-info">
-              <Card.Header className="bg-info text-white text-center">
+            <Card className="border-accent">
+              <Card.Header className="results-header text-center">
                 <h3>Professional Property Analysis Suite</h3>
               </Card.Header>
               <Card.Body>
                 <Row>
                   <Col md={6} className="mb-4">
                     <div className="text-center">
-                      <h4 className="text-info">Adjustment Sensitivity Analysis</h4>
-                      <p>
+                      <h4 className="text-buildu-primary">Adjustment Sensitivity Analysis</h4>
+                      <p className="text-buildu-secondary">
                         Analyze how adjustments affect comparable property values to determine 
                         if your adjustments are credible and reflective of the market.
                       </p>
@@ -50,8 +52,8 @@ const HomePage = () => {
                   </Col>
                   <Col md={6} className="mb-4">
                     <div className="text-center">
-                      <h4 className="text-info">GLA Adjustment Calculator</h4>
-                      <p>
+                      <h4 className="text-buildu-primary">GLA Adjustment Calculator</h4>
+                      <p className="text-buildu-secondary">
                         Calculate Gross Living Area (GLA) adjustments using the Ratterman 
                         method with support for file imports and manual entry.
                       </p>
@@ -66,7 +68,7 @@ const HomePage = () => {
                 </Row>
                 <div className="text-center">
                   <Button 
-                    variant="info" 
+                    variant="primary" 
                     size="lg" 
                     onClick={() => navigate('/login')}
                   >
@@ -99,20 +101,20 @@ const HomePage = () => {
   return (
     <Container className="mt-5">
       <div className="text-center mb-5">
-        <h2 className="mb-3">Welcome back, {user?.email}!</h2>
-        <p className="lead text-muted">
+        <h2 className="mb-3 text-buildu-primary">Welcome back, {user?.email}!</h2>
+        <p className="lead text-buildu-secondary">
           Choose a tool to get started with your property analysis
         </p>
       </div>
 
       <Row className="justify-content-center">
         <Col md={6} className="mb-4">
-          <Card className="h-100 border-info">
-            <Card.Header className="bg-info text-white text-center">
+          <Card className="h-100 border-accent">
+            <Card.Header className="results-header text-center">
               <h3>Adjustment Sensitivity Analysis</h3>
             </Card.Header>
             <Card.Body className="d-flex flex-column">
-              <Card.Text>
+              <Card.Text className="text-buildu-secondary">
                 Analyze how adjustments affect comparable property values to determine 
                 if your adjustments are credible and reflective of the market. Upload 
                 XML files and get detailed sensitivity analysis reports.
@@ -125,7 +127,7 @@ const HomePage = () => {
                   <li>✓ Market credibility assessment</li>
                 </ul>
                 <Button 
-                  variant="info" 
+                  variant="primary" 
                   size="lg" 
                   className="w-100"
                   onClick={() => navigate('/sensitivity-analysis')}
@@ -138,12 +140,12 @@ const HomePage = () => {
         </Col>
 
         <Col md={6} className="mb-4">
-          <Card className="h-100 border-info">
-            <Card.Header className="bg-info text-white text-center">
+          <Card className="h-100 border-accent">
+            <Card.Header className="results-header text-center">
               <h3>GLA Adjustment Calculator</h3>
             </Card.Header>
             <Card.Body className="d-flex flex-column">
-              <Card.Text>
+              <Card.Text className="text-buildu-secondary">
                 Calculate Gross Living Area (GLA) adjustments using the Ratterman 
                 method. Import data from CSV/Excel files or enter manually to get 
                 precise adjustment calculations.
@@ -156,7 +158,7 @@ const HomePage = () => {
                   <li>✓ Detailed adjustment reports</li>
                 </ul>
                 <Button 
-                  variant="info" 
+                  variant="primary" 
                   size="lg" 
                   className="w-100"
                   onClick={() => navigate('/gla-calculator')}
